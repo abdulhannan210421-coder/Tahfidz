@@ -51,9 +51,12 @@
   <!-- VIEWPORT UTAMA: FULLSCREEN IFRAME MEMUAT WEB HTML -->
   <iframe id="mainViewport" src="Database Tahfidz.html" class="w-full h-full border-none block z-10"></iframe>
 
+  <!-- LAPIS TRANSPARAN PENANGKAP KURSOR SAAT DOCK TERBUKA -->
+  <div id="dockBackdrop" class="fixed inset-0 z-40 hidden"></div>
+
   <!-- INDIKATOR TEPI BAWAH LAYAR (PETUNJUK KURSOR) -->
-  <div id="bottomDockTriggerZone" class="fixed bottom-0 left-0 right-0 h-3 z-40 cursor-pointer group flex justify-center items-end pb-1" title="Geser kursor ke sini untuk membuka Menu Dock">
-    <div class="w-24 h-1 rounded-full bg-emerald-500/40 group-hover:bg-emerald-400 group-hover:w-36 transition-all duration-300 shadow-[0_0_12px_rgba(16,185,129,0.8)]"></div>
+  <div id="bottomDockTriggerZone" class="fixed bottom-0 left-0 right-0 h-4 z-40 cursor-pointer group flex justify-center items-end pb-1" title="Geser kursor ke sini untuk membuka Menu Dock">
+    <div class="w-24 h-1 rounded-full bg-emerald-500/50 group-hover:bg-emerald-400 group-hover:w-40 transition-all duration-300 shadow-[0_0_12px_rgba(16,185,129,0.9)]"></div>
   </div>
 
   <!-- MACOS FLOATING DOCK NAVIGATION (AUTO-HIDE BY DEFAULT) -->
@@ -159,32 +162,41 @@
     }
 
     /* ==========================================================
-       4. AUTO-HIDE DOCK ENGINE (MUNCUL KETIKA KURSOR KE BAWAH)
+       4. AUTO-HIDE DOCK ENGINE DENGAN BACKDROP PENANGKAP KURSOR
        ========================================================== */
     let isDockOpen = false;
 
     function setupAutoHideDockEngine() {
       const wrapper = document.getElementById('macDockWrapper');
+      const trigger = document.getElementById('bottomDockTriggerZone');
+      const backdrop = document.getElementById('dockBackdrop');
 
-      window.addEventListener('mousemove', (e) => {
-        const screenHeight = window.innerHeight;
-        const mouseY = e.clientY;
+      // Buka Dock saat kursor menyentuh zona paling bawah
+      trigger.addEventListener('mousemove', () => openDock());
+      trigger.addEventListener('mouseenter', () => openDock());
 
-        // Buka Dock jika kursor mendekati 35px dari bawah layar
-        if (mouseY >= screenHeight - 35 && !isDockOpen) {
-          isDockOpen = true;
-          wrapper.classList.remove('translate-y-[140%]', 'opacity-0', 'pointer-events-none');
-          wrapper.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
-        } else if (isDockOpen) {
-          // Tutup Dock jika kursor bergerak jauh ke atas meninggalkan area Dock
-          const rect = wrapper.getBoundingClientRect();
-          if (mouseY < rect.top - 50 || e.clientX < rect.left - 50 || e.clientX > rect.right + 50) {
-            isDockOpen = false;
-            wrapper.classList.add('translate-y-[140%]', 'opacity-0', 'pointer-events-none');
-            wrapper.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
-          }
-        }
-      });
+      // Tutup Dock saat kursor bergerak meninggalkan area Dock menuju layar atas
+      backdrop.addEventListener('mousemove', () => closeDock());
+      backdrop.addEventListener('mouseenter', () => closeDock());
+
+      // Tutup Dock jika kursor keluar dari batas bawah layar
+      wrapper.addEventListener('mouseleave', () => closeDock());
+
+      function openDock() {
+        if (isDockOpen) return;
+        isDockOpen = true;
+        wrapper.classList.remove('translate-y-[140%]', 'opacity-0', 'pointer-events-none');
+        wrapper.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
+        backdrop.classList.remove('hidden');
+      }
+
+      function closeDock() {
+        if (!isDockOpen) return;
+        isDockOpen = false;
+        wrapper.classList.add('translate-y-[140%]', 'opacity-0', 'pointer-events-none');
+        wrapper.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
+        backdrop.classList.add('hidden');
+      }
     }
 
     /* ==========================================================
