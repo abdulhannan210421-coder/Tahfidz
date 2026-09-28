@@ -3,61 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal Dashboard Tahfidz Sidogiri</title>
+  <title>Portal Utama Tahfidz Sidogiri</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
     
     * {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       box-sizing: border-box;
     }
 
-    body {
-      background: radial-gradient(circle at top left, #0f172a 0%, #020617 100%);
-      color: #f8fafc;
-      overflow-x: hidden;
-      min-height: 100vh;
-    }
-
-    /* Scrollbar Modern macOS */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 99px; }
-    ::-webkit-scrollbar-thumb:hover { background: #475569; }
-
-    /* Glassmorphism Ultra Modern */
-    .glass-panel {
-      background: rgba(30, 41, 59, 0.65);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .glass-card {
-      background: rgba(15, 23, 42, 0.5);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .glass-card:hover {
-      border-color: rgba(16, 185, 129, 0.4);
-      transform: translateY(-4px);
-      box-shadow: 0 20px 40px -15px rgba(16, 185, 129, 0.15);
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #0f172a;
     }
 
     /* macOS Dock Physics & Animation Engine */
     .dock-container {
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(15, 23, 42, 0.85);
       backdrop-filter: blur(30px);
       -webkit-backdrop-filter: blur(30px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    }
+
+    .dock-wrapper {
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease-out;
+      will-change: transform, opacity;
     }
 
     .dock-item {
@@ -65,246 +44,26 @@
       will-change: transform;
       transform-origin: bottom center;
     }
-
-    .mac-window-anim {
-      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease-out;
-      will-change: transform, opacity;
-    }
   </style>
 </head>
-<body class="pb-32 antialiased selection:bg-emerald-500 selection:text-white">
+<body class="relative w-screen h-screen overflow-hidden bg-slate-950">
 
-  <!-- iOS FLOATING TOAST NOTIFICATION -->
-  <div id="iosToast" class="fixed top-6 left-1/2 -translate-x-1/2 z-[100] transform -translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
-    <div class="glass-panel rounded-full px-6 py-3 flex items-center gap-3.5 shadow-2xl border border-white/20">
-      <div id="toastIcon" class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-xs shrink-0">
-        <i class="fa-solid fa-check"></i>
-      </div>
-      <div>
-        <p id="toastTitle" class="text-xs font-bold text-white leading-tight">Notifikasi</p>
-        <p id="toastMsg" class="text-[11px] text-slate-400 font-medium leading-tight">Pesan sistem...</p>
-      </div>
-    </div>
+  <!-- VIEWPORT UTAMA: FULLSCREEN IFRAME MEMUAT WEB HTML -->
+  <iframe id="mainViewport" src="Database Tahfidz.html" class="w-full h-full border-none block z-10"></iframe>
+
+  <!-- INDIKATOR TEPI BAWAH LAYAR (PETUNJUK KURSOR) -->
+  <div id="bottomDockTriggerZone" class="fixed bottom-0 left-0 right-0 h-3 z-40 cursor-pointer group flex justify-center items-end pb-1" title="Geser kursor ke sini untuk membuka Menu Dock">
+    <div class="w-24 h-1 rounded-full bg-emerald-500/40 group-hover:bg-emerald-400 group-hover:w-36 transition-all duration-300 shadow-[0_0_12px_rgba(16,185,129,0.8)]"></div>
   </div>
 
-  <!-- HEADER BAR UTAMA -->
-  <header class="glass-panel sticky top-0 z-40 px-4 sm:px-8 py-4 mb-8">
-    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-      
-      <div class="flex items-center gap-4">
-        <!-- Control Dot Mac -->
-        <div class="flex items-center gap-2">
-          <span class="w-3.5 h-3.5 rounded-full bg-rose-500 border border-rose-600/40 inline-block shadow-sm"></span>
-          <span class="w-3.5 h-3.5 rounded-full bg-amber-400 border border-amber-500/40 inline-block shadow-sm"></span>
-          <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 border border-emerald-600/40 inline-block shadow-sm"></span>
-        </div>
-        <div class="h-6 w-px bg-slate-700/80 mx-1"></div>
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
-            <i class="fa-solid fa-layer-group text-lg"></i>
-          </div>
-          <div>
-            <h1 class="font-extrabold text-white text-base tracking-tight leading-none">PORTAL TAHFIDZ SIDOGIRI</h1>
-            <p class="text-[11px] text-slate-400 font-semibold mt-1">Dashboard Laporan & Statistik Terintegrasi</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <div id="syncBadge" class="bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-1.5 rounded-full text-xs flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span id="syncText" class="font-bold text-emerald-300 text-[11px]">Terhubung Live</span>
-        </div>
-        <button onclick="loadGlobalData()" title="Segarkan Laporan Global" class="w-9 h-9 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center border border-slate-700 transition active:scale-95">
-          <i id="refreshIcon" class="fa-solid fa-rotate text-xs"></i>
-        </button>
-      </div>
-
-    </div>
-  </header>
-
-  <!-- KONTEN UTAMA: STATISTIK DARI MASING-MASING WEB MODUL -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-8 space-y-8">
-
-    <!-- RINGKASAN UTAMA GLOBAL -->
-    <section>
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xs font-extrabold uppercase tracking-widest text-slate-400 flex items-center gap-2">
-          <i class="fa-solid fa-chart-pie text-emerald-400"></i> Laporan Lintas Web
-        </h2>
-        <span class="text-[11px] text-slate-500 font-medium" id="lastSyncTime">Update Realtime</span>
-      </div>
-
-      <!-- GRID WIDGET STATISTIK UNTUK MASING-MASING WEB -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-        <!-- WIDGET 1: STATISTIK DATABASE TAHFIDZ -->
-        <div class="glass-card p-6 rounded-3xl relative overflow-hidden cursor-pointer" onclick="openAppInModal('Database Tahfidz.html', 'Database Tahfidz', event)">
-          <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-600 text-white flex items-center justify-center text-lg shadow-lg">
-                <i class="fa-solid fa-book-quran"></i>
-              </div>
-              <div>
-                <h3 class="font-extrabold text-sm text-white">Database Tahfidz</h3>
-                <p class="text-[11px] text-slate-400">Master Data Santri & Target</p>
-              </div>
-            </div>
-            <span class="text-[10px] font-extrabold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Laporan Master</span>
-          </div>
-
-          <div class="grid grid-cols-3 gap-3 text-center">
-            <div class="bg-slate-900/60 p-3 rounded-2xl border border-white/5">
-              <p class="text-[10px] font-bold text-slate-400 uppercase">Total Santri</p>
-              <p class="text-xl font-black text-white mt-1" id="dbTotalSantri">...</p>
-            </div>
-            <div class="bg-slate-900/60 p-3 rounded-2xl border border-white/5">
-              <p class="text-[10px] font-bold text-slate-400 uppercase">Khatam (30 Juz)</p>
-              <p class="text-xl font-black text-amber-400 mt-1" id="dbKhatam">...</p>
-            </div>
-            <div class="bg-slate-900/60 p-3 rounded-2xl border border-white/5">
-              <p class="text-[10px] font-bold text-slate-400 uppercase">Capaian Juz 20+</p>
-              <p class="text-xl font-black text-emerald-400 mt-1" id="dbJuz20">...</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- WIDGET 2: STATISTIK TES BERKALA & KEUANGAN -->
-        <div class="glass-card p-6 rounded-3xl relative overflow-hidden cursor-pointer" onclick="openAppInModal('Tes Berkala.html', 'Tes Berkala & Keuangan', event)">
-          <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 text-white flex items-center justify-center text-lg shadow-lg">
-                <i class="fa-solid fa-clipboard-check"></i>
-              </div>
-              <div>
-                <h3 class="font-extrabold text-sm text-white">Tes Berkala & Keuangan</h3>
-                <p class="text-[11px] text-slate-400">Pengujian & Buku Kas</p>
-              </div>
-            </div>
-            <span class="text-[10px] font-extrabold px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">Laporan Ujian</span>
-          </div>
-
-          <div class="grid grid-cols-3 gap-3 text-center">
-            <div class="bg-slate-900/60 p-3 rounded-2xl border border-white/5">
-              <p class="text-[10px] font-bold text-slate-400 uppercase">Total Peserta</p>
-              <p class="text-xl font-black text-white mt-1" id="tesTotal">...</p>
-            </div>
-            <div class="bg-slate-900/60 p-3 rounded-2xl border border-white/5">
-              <p class="text-[10px] font-bold text-slate-400 uppercase">Proses Ujian</p>
-              <p class="text-xl font-black text-blue-400 mt-1" id="tesProses">...</p>
-            </div>
-            <div class="bg-slate-900/60 p-3 rounded-2xl border border-white/5">
-              <p class="text-[10px] font-bold text-slate-400 uppercase">Selesai / Lulus</p>
-              <p class="text-xl font-black text-emerald-400 mt-1" id="tesLulus">...</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- WIDGET 3: STATISTIK PRESENSI TAKROR -->
-        <div class="glass-card p-6 rounded-3xl relative overflow-hidden cursor-pointer" onclick="openAppInModal('Presensi.html', 'Presensi Takror', event)">
-          <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 text-white flex items-center justify-center text-lg shadow-lg">
-                <i class="fa-solid fa-calendar-check"></i>
-              </div>
-              <div>
-                <h3 class="font-extrabold text-sm text-white">Presensi Takror Yaumiyah</h3>
-                <p class="text-[11px] text-slate-400">Rekapitulasi Kehadiran</p>
-              </div>
-            </div>
-            <span class="text-[10px] font-extrabold px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Laporan Absensi</span>
-          </div>
-
-          <div class="grid grid-cols-3 gap-3 text-center">
-            <div class="bg-slate-900/60 p-3 rounded-2xl border border-white/5">
-              <p class="text-[10px] font-bold text-slate-400 uppercase">Total Sakit (S)</p>
-              <p class="text-xl font-black text-blue-400 mt-1" id="absensiSakit">...</p>
-            </div>
-            <div class="bg-slate-900/60 p-3 rounded-2xl border border-white/5">
-              <p class="text-[10px] font-bold text-slate-400 uppercase">Total Izin (I)</p>
-              <p class="text-xl font-black text-amber-400 mt-1" id="absensiIzin">...</p>
-            </div>
-            <div class="bg-slate-900/60 p-3 rounded-2xl border border-white/5">
-              <p class="text-[10px] font-bold text-slate-400 uppercase">Total Alpa (A)</p>
-              <p class="text-xl font-black text-rose-400 mt-1" id="absensiAlpa">...</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- WIDGET 4: STATISTIK PEROLEHAN LEMBAR -->
-        <div class="glass-card p-6 rounded-3xl relative overflow-hidden cursor-pointer" onclick="openAppInModal('Perolehan.html', 'Perolehan Lembar', event)">
-          <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 to-pink-600 text-white flex items-center justify-center text-lg shadow-lg">
-                <i class="fa-solid fa-chart-column"></i>
-              </div>
-              <div>
-                <h3 class="font-extrabold text-sm text-white">Perolehan Lembar Hafalan</h3>
-                <p class="text-[11px] text-slate-400">Monitoring Capaian Bulanan</p>
-              </div>
-            </div>
-            <span class="text-[10px] font-extrabold px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">Laporan Bulanan</span>
-          </div>
-
-          <div class="grid grid-cols-3 gap-3 text-center">
-            <div class="bg-slate-900/60 p-3 rounded-2xl border border-white/5">
-              <p class="text-[10px] font-bold text-slate-400 uppercase">Bermasalah (MSLH)</p>
-              <p class="text-xl font-black text-rose-400 mt-1" id="perolehanMSLH">...</p>
-            </div>
-            <div class="bg-slate-900/60 p-3 rounded-2xl border border-white/5">
-              <p class="text-[10px] font-bold text-slate-400 uppercase">Santri Daerah T</p>
-              <p class="text-xl font-black text-emerald-400 mt-1" id="perolehanDaerahT">...</p>
-            </div>
-            <div class="bg-slate-900/60 p-3 rounded-2xl border border-white/5">
-              <p class="text-[10px] font-bold text-slate-400 uppercase">Total Jalsah</p>
-              <p class="text-xl font-black text-white mt-1" id="perolehanJalsah">...</p>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-  </main>
-
-  <!-- MACOS FLOATING DOCK NAVIGATION DI BAWAH (MAGNIFICATION / FISHEYE PHYSICS) -->
-  <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-    <div id="macDock" class="dock-container rounded-3xl px-4 py-3 flex items-center gap-3 shadow-2xl border border-white/20">
-      <!-- Ikon Dock otomatis di-generate dari menu.json / config oleh JavaScript -->
-    </div>
-  </div>
-
-  <!-- FLOATING PREVIEW MODAL WINDOW MAC OS -->
-  <div id="macAppWindow" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xl z-[90] hidden items-center justify-center p-4 sm:p-8 transition-opacity duration-300 opacity-0">
-    <div id="macAppCard" class="glass-panel w-full max-w-6xl h-[85vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col border border-white/20 transform scale-0 opacity-0 mac-window-anim">
-      
-      <!-- Window Control Header Bar macOS -->
-      <div class="bg-slate-900/90 border-b border-white/10 px-5 py-3 flex justify-between items-center shrink-0">
-        <div class="flex items-center gap-2">
-          <button onclick="closeAppWindow()" class="w-3.5 h-3.5 rounded-full bg-rose-500 hover:bg-rose-600 transition shadow-sm"></button>
-          <button onclick="toggleMaximizeWindow()" class="w-3.5 h-3.5 rounded-full bg-amber-400 hover:bg-amber-500 transition shadow-sm"></button>
-          <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 inline-block shadow-sm"></span>
-          <span class="text-xs font-extrabold text-slate-300 ml-2 tracking-tight" id="windowAppTitle">Aplikasi</span>
-        </div>
-        <div class="flex items-center gap-3">
-          <a id="windowOpenExternalBtn" href="#" target="_blank" class="text-slate-400 hover:text-white text-xs font-bold transition flex items-center gap-1.5">
-            <i class="fa-solid fa-up-right-from-square"></i> Buka Penuh
-          </a>
-          <button onclick="closeAppWindow()" class="text-slate-400 hover:text-white text-base font-bold transition">&times;</button>
-        </div>
-      </div>
-
-      <!-- Window Frame Viewport -->
-      <div class="flex-1 bg-slate-900 relative">
-        <iframe id="windowIframe" src="" class="w-full h-full border-none"></iframe>
-      </div>
-
+  <!-- MACOS FLOATING DOCK NAVIGATION (AUTO-HIDE BY DEFAULT) -->
+  <div id="macDockWrapper" class="dock-wrapper fixed bottom-4 left-1/2 -translate-x-1/2 z-50 transform translate-y-[140%] opacity-0 pointer-events-none">
+    <div id="macDock" class="dock-container rounded-3xl px-4 py-3 flex items-center gap-3">
+      <!-- Item menu otomatis di-render dari JS / menu.json -->
     </div>
   </div>
 
   <script>
-    const TAHFIDZ_API_URL = "https://script.google.com/macros/s/AKfycbyxUxHHN179eb5XfsyX3YIg3ljfDbXlnoM6xLKgt2ml4CTxntoRUcxg3_vtiBqgcwVy/exec";
-
     const DEFAULT_MODULES = [
       {
         id: "database",
@@ -337,15 +96,16 @@
     ];
 
     let appModules = DEFAULT_MODULES;
+    let activeFile = "Database Tahfidz.html";
 
     /* ==========================================================
-       1. INITIALIZATION & DYNAMIC CONFIG MENU LOADING
+       1. INITIALIZATION & CONFIG LOADING
        ========================================================== */
     window.addEventListener('DOMContentLoaded', async () => {
       await fetchMenuConfig();
       renderDockUI();
       setupMacDockPhysics();
-      loadGlobalData();
+      setupAutoHideDockEngine();
     });
 
     async function fetchMenuConfig() {
@@ -370,10 +130,12 @@
       let dockHtml = '';
 
       appModules.forEach((mod) => {
+        const isActive = activeFile === mod.file;
         dockHtml += `
-          <div class="dock-item relative group flex items-center justify-center cursor-pointer" data-file="${mod.file}" data-title="${mod.title}">
-            <button onclick="openAppInModal('${mod.file}', '${mod.title}', event)" class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr ${mod.color} text-white flex items-center justify-center text-xl sm:text-2xl shadow-xl border border-white/20 active:scale-95">
+          <div class="dock-item relative group flex items-center justify-center cursor-pointer" onclick="switchApp('${mod.file}', this)">
+            <button class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr ${mod.color} text-white flex items-center justify-center text-xl sm:text-2xl shadow-xl border border-white/20 active:scale-95 relative">
               <i class="fa-solid ${mod.icon}"></i>
+              ${isActive ? '<span class="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>' : ''}
             </button>
             <div class="absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-900/95 text-white text-[11px] font-extrabold px-3 py-1.5 rounded-xl shadow-2xl border border-white/20 opacity-0 group-hover:opacity-100 transition-all duration-150 pointer-events-none whitespace-nowrap z-[100]">
               ${mod.title}
@@ -386,7 +148,47 @@
     }
 
     /* ==========================================================
-       3. MACOS DOCK MAGNIFICATION PHYSICS ENGINE
+       3. SWITCH WEB APP
+       ========================================================== */
+    function switchApp(fileUrl, element) {
+      activeFile = fileUrl;
+      const iframe = document.getElementById('mainViewport');
+      iframe.src = fileUrl;
+      renderDockUI();
+      setupMacDockPhysics();
+    }
+
+    /* ==========================================================
+       4. AUTO-HIDE DOCK ENGINE (MUNCUL KETIKA KURSOR KE BAWAH)
+       ========================================================== */
+    let isDockOpen = false;
+
+    function setupAutoHideDockEngine() {
+      const wrapper = document.getElementById('macDockWrapper');
+
+      window.addEventListener('mousemove', (e) => {
+        const screenHeight = window.innerHeight;
+        const mouseY = e.clientY;
+
+        // Buka Dock jika kursor mendekati 35px dari bawah layar
+        if (mouseY >= screenHeight - 35 && !isDockOpen) {
+          isDockOpen = true;
+          wrapper.classList.remove('translate-y-[140%]', 'opacity-0', 'pointer-events-none');
+          wrapper.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
+        } else if (isDockOpen) {
+          // Tutup Dock jika kursor bergerak jauh ke atas meninggalkan area Dock
+          const rect = wrapper.getBoundingClientRect();
+          if (mouseY < rect.top - 50 || e.clientX < rect.left - 50 || e.clientX > rect.right + 50) {
+            isDockOpen = false;
+            wrapper.classList.add('translate-y-[140%]', 'opacity-0', 'pointer-events-none');
+            wrapper.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
+          }
+        }
+      });
+    }
+
+    /* ==========================================================
+       5. MACOS DOCK MAGNIFICATION PHYSICS
        ========================================================== */
     function setupMacDockPhysics() {
       const dock = document.getElementById('macDock');
@@ -424,167 +226,6 @@
           item.style.margin = '0 0px';
         });
       });
-    }
-
-    /* ==========================================================
-       4. LOAD & PARSE REALTIME STATS FOR EACH WEB WIDGET
-       ========================================================== */
-    async function loadGlobalData() {
-      const refreshIcon = document.getElementById('refreshIcon');
-      if (refreshIcon) refreshIcon.classList.add('fa-spin');
-
-      try {
-        const resp = await fetch(TAHFIDZ_API_URL + "?action=getData");
-        const res = await resp.json();
-
-        if (res.success && res.rows) {
-          const rows = res.rows;
-          const totalSantri = rows.length;
-
-          let countKhatam = 0;
-          let countJuz20 = 0;
-          let countMSLH = 0;
-          let countDaerahT = 0;
-          let jalsahSet = new Set();
-
-          rows.forEach(r => {
-            const hal = parseFloat(r[17]) || 0;
-            const juzStr = String(r[18] || '').toUpperCase();
-            const jalsahVal = String(r[5] || '').trim();
-            const domisili = String(r[2] || '').trim().toUpperCase();
-
-            if (jalsahVal) jalsahSet.add(jalsahVal);
-            if (domisili.startsWith('T')) countDaerahT++;
-
-            if (hal >= 700 || juzStr.includes("HATAM")) {
-              countKhatam++;
-            } else {
-              const m = juzStr.match(/\d+/);
-              if (m && parseInt(m[0]) >= 20) {
-                countJuz20++;
-              }
-            }
-
-            // Hitung Kategori MSLH (< 8 Lembar / Hal Akhir Rendah)
-            const hasil1Thn = parseFloat(r[19]) || 0;
-            if (hasil1Thn < 8) countMSLH++;
-          });
-
-          // Update Widget Database Tahfidz
-          document.getElementById('dbTotalSantri').innerText = totalSantri.toLocaleString();
-          document.getElementById('dbKhatam').innerText = countKhatam.toLocaleString();
-          document.getElementById('dbJuz20').innerText = countJuz20.toLocaleString();
-
-          // Update Widget Perolehan Lembar
-          document.getElementById('perolehanMSLH').innerText = countMSLH.toLocaleString();
-          document.getElementById('perolehanDaerahT').innerText = countDaerahT.toLocaleString();
-          document.getElementById('perolehanJalsah').innerText = jalsahSet.size.toLocaleString();
-
-          // Update Widget Tes Berkala (Simulasi/Kalkulasi dari Master)
-          document.getElementById('tesTotal').innerText = Math.round(totalSantri * 0.45).toLocaleString();
-          document.getElementById('tesProses').innerText = Math.round(totalSantri * 0.12).toLocaleString();
-          document.getElementById('tesLulus').innerText = Math.round(totalSantri * 0.33).toLocaleString();
-
-          // Update Widget Presensi Takror
-          document.getElementById('absensiSakit').innerText = Math.round(totalSantri * 0.03).toLocaleString();
-          document.getElementById('absensiIzin').innerText = Math.round(totalSantri * 0.05).toLocaleString();
-          document.getElementById('absensiAlpa').innerText = Math.round(totalSantri * 0.02).toLocaleString();
-
-          document.getElementById('lastSyncTime').innerText = `Diperbarui: ${new Date().toLocaleTimeString()}`;
-          showIosToast("Data Terhubung", "Berhasil memperbarui statistik global!");
-        }
-      } catch (err) {
-        showIosToast("Gagal Terhubung", "Menggunakan cache offline.", "error");
-      } finally {
-        if (refreshIcon) refreshIcon.classList.remove('fa-spin');
-      }
-    }
-
-    /* ==========================================================
-       5. POPUP WINDOW PREVIEW MODAL ALA MACOS
-       ========================================================== */
-    let triggerBtnOrigin = null;
-
-    function openAppInModal(fileUrl, title, e) {
-      if (e && e.currentTarget) triggerBtnOrigin = e.currentTarget;
-
-      const windowModal = document.getElementById('macAppWindow');
-      const windowCard = document.getElementById('macAppCard');
-      const iframe = document.getElementById('windowIframe');
-
-      document.getElementById('windowAppTitle').innerText = title;
-      document.getElementById('windowOpenExternalBtn').href = fileUrl;
-      iframe.src = fileUrl;
-
-      if (triggerBtnOrigin) {
-        const rect = triggerBtnOrigin.getBoundingClientRect();
-        const originX = rect.left + rect.width / 2;
-        const originY = rect.top + rect.height / 2;
-        windowCard.style.transformOrigin = `${originX}px ${originY}px`;
-      } else {
-        windowCard.style.transformOrigin = 'center center';
-      }
-
-      windowModal.classList.remove('hidden');
-      windowModal.classList.add('flex');
-
-      setTimeout(() => {
-        windowModal.classList.remove('opacity-0');
-        windowModal.classList.add('opacity-100');
-        windowCard.classList.remove('scale-0', 'opacity-0');
-        windowCard.classList.add('scale-100', 'opacity-100');
-      }, 20);
-    }
-
-    function closeAppWindow() {
-      const windowModal = document.getElementById('macAppWindow');
-      const windowCard = document.getElementById('macAppCard');
-      const iframe = document.getElementById('windowIframe');
-
-      windowCard.classList.remove('scale-100', 'opacity-100');
-      windowCard.classList.add('scale-0', 'opacity-0');
-      windowModal.classList.remove('opacity-100');
-      windowModal.classList.add('opacity-0');
-
-      setTimeout(() => {
-        windowModal.classList.remove('flex');
-        windowModal.classList.add('hidden');
-        iframe.src = "";
-      }, 350);
-    }
-
-    function toggleMaximizeWindow() {
-      const windowCard = document.getElementById('macAppCard');
-      windowCard.classList.toggle('max-w-6xl');
-      windowCard.classList.toggle('h-[85vh]');
-      windowCard.classList.toggle('max-w-none');
-      windowCard.classList.toggle('h-full');
-    }
-
-    /* ==========================================================
-       6. SYSTEM TOAST
-       ========================================================== */
-    function showIosToast(title, msg, type = 'success') {
-      const toast = document.getElementById('iosToast');
-      const icon = document.getElementById('toastIcon');
-      document.getElementById('toastTitle').innerText = title;
-      document.getElementById('toastMsg').innerText = msg;
-
-      if (type === 'error') {
-        icon.className = "w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center font-bold text-xs shrink-0";
-        icon.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i>`;
-      } else {
-        icon.className = "w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-xs shrink-0";
-        icon.innerHTML = `<i class="fa-solid fa-check"></i>`;
-      }
-
-      toast.classList.remove('-translate-y-24', 'opacity-0', 'pointer-events-none');
-      toast.classList.add('translate-y-0', 'opacity-100');
-
-      setTimeout(() => {
-        toast.classList.remove('translate-y-0', 'opacity-100');
-        toast.classList.add('-translate-y-24', 'opacity-0', 'pointer-events-none');
-      }, 3500);
     }
   </script>
 </body>
