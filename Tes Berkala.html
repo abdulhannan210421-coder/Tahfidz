@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Tes Berkala Tahfidz & Keuangan (macOS Modal & Sync Delete)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    body { 
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f1f5f9;
+    }
+    /* Smooth Scrollbar khas macOS */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* macOS Dock Hover Magnification Effect */
+    .dock-icon {
+      transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.2s;
+    }
+    .dock-icon:hover {
+      transform: scale(1.35);
+    }
+  </style>
+</head>
+<body class="text-slate-800 pb-16 antialiased selection:bg-emerald-500 selection:text-white overflow-x-hidden">
+
+  <!-- macOS Floating Toast Notification -->
+  <div id="macToast" class="fixed top-6 left-1/2 -translate-x-1/2 z-[100] transform -translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="bg-white/90 backdrop-blur-xl border border-slate-200/80 shadow-2xl shadow-slate-900/10 rounded-2xl px-5 py-3.5 flex items-center gap-3.5 min-w-[320px]">
+      <div id="toastIcon" class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold shrink-0">
+        <i class="fa-solid fa-check text-sm"></i>
+      </div>
+      <div>
+        <p id="toastTitle" class="text-xs font-bold text-slate-800">Notifikasi</p>
+        <p id="toastMsg" class="text-xs text-slate-500 font-medium">Pesan sistem...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- macOS Glassmorphism Confirmation Modal (Pengganti Alert Kaku Browser) -->
+  <div id="macModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4 transition-all">
+    <div id="macModalCard" class="bg-white/95 backdrop-blur-2xl border border-slate-200/90 rounded-3xl p-6 max-w-sm w-full shadow-2xl scale-95 opacity-0 transition-all duration-200">
+      <div class="w-11 h-11 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-4 shadow-inner">
+        <i class="fa-solid fa-trash-can text-lg"></i>
+      </div>
+      <h3 id="macModalTitle" class="font-bold text-slate-900 text-sm mb-1 tracking-tight">Konfirmasi Hapus</h3>
+      <p id="macModalMsg" class="text-xs text-slate-500 font-medium leading-relaxed mb-6">Apakah Anda yakin ingin menghapus data ini dari sistem?</p>
+      <div class="flex gap-2.5 justify-end">
+        <button onclick="closeMacModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">Batal</button>
+        <button id="macModalConfirmBtn" class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-lg shadow-rose-600/20 transition">Hapus Data</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== DOCK KIRI (LEFT DOCK) ==================== -->
+  <div id="leftDockTrigger" class="fixed left-0 top-0 bottom-0 w-8 z-[80] group/leftdock">
+    <div class="fixed left-3 top-1/2 -translate-y-1/2 z-[90] bg-white/85 backdrop-blur-2xl border border-slate-200/90 shadow-2xl shadow-slate-900/15 rounded-3xl p-2.5 flex flex-col gap-3 transition-all duration-300 transform -translate-x-[calc(100%+20px)] group-hover/leftdock:translate-x-0">
+      
+      <div class="text-[9px] font-extrabold text-slate-400 text-center uppercase tracking-widest py-1 border-b border-slate-100">
+        Menu
+      </div>
+
+      <!-- Dock Item 1: Pendaftaran -->
+      <div class="relative group/icon">
+        <button onclick="switchTab('tab-daftar')" class="dock-icon w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-lg shadow-emerald-600/30">
+          <i class="fa-solid fa-pen-to-square text-base"></i>
+        </button>
+        <div class="absolute left-full ml-3 top-1/2 -translate-y-1/2 opacity-0 group-hover/icon:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap bg-slate-900/90 text-white text-[11px] font-semibold px-3 py-1.5 rounded-xl shadow-xl backdrop-blur-md border border-white/10 z-50">
+          Pendaftaran Tes
+        </div>
+      </div>
+
+      <!-- Dock Item 2: Input Keputusan -->
+      <div class="relative group/icon">
+        <button onclick="switchTab('tab-keputusan')" class="dock-icon w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center shadow-lg shadow-blue-600/30">
+          <i class="fa-solid fa-clipboard-check text-base"></i>
+        </button>
+        <div class="absolute left-full ml-3 top-1/2 -translate-y-1/2 opacity-0 group-hover/icon:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap bg-slate-900/90 text-white text-[11px] font-semibold px-3 py-1.5 rounded-xl shadow-xl backdrop-blur-md border border-white/10 z-50">
+          Input Keputusan
+        </div>
+      </div>
+
+      <!-- Dock Item 3: Tagihan Santri -->
+      <div class="relative group/icon">
+        <button onclick="switchTab('tab-tagihan')" class="dock-icon w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-400 text-white flex items-center justify-center shadow-lg shadow-amber-500/30">
+          <i class="fa-solid fa-file-invoice-dollar text-base"></i>
+        </button>
+        <div class="absolute left-full ml-3 top-1/2 -translate-y-1/2 opacity-0 group-hover/icon:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap bg-slate-900/90 text-white text-[11px] font-semibold px-3 py-1.5 rounded-xl shadow-xl backdrop-blur-md border border-white/10 z-50">
+          Tagihan Santri
+        </div>
+      </div>
+
+      <!-- Dock Item 4: Status Badal -->
+      <div class="relative group/icon">
+        <button onclick="switchTab('tab-badal')" class="dock-icon w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-500 text-white flex items-center justify-center shadow-lg shadow-indigo-600/30">
+          <i class="fa-solid fa-user-tie text-base"></i>
+        </button>
+        <div class="absolute left-full ml-3 top-1/2 -translate-y-1/2 opacity-0 group-hover/icon:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap bg-slate-900/90 text-white text-[11px] font-semibold px-3 py-1.5 rounded-xl shadow-xl backdrop-blur-md border border-white/10 z-50">
+          Status Badal Tes
+        </div>
+      </div>
+
+      <!-- Dock Item 5: Keuangan -->
+      <div class="relative group/icon">
+        <button onclick="switchTab('tab-keuangan')" class="dock-icon w-11 h-11 rounded-2xl bg-gradient-to-tr from-rose-600 to-pink-500 text-white flex items-center justify-center shadow-lg shadow-rose-600/30">
+          <i class="fa-solid fa-wallet text-base"></i>
+        </button>
+        <div class="absolute left-full ml-3 top-1/2 -translate-y-1/2 opacity-0 group-hover/icon:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap bg-slate-900/90 text-white text-[11px] font-semibold px-3 py-1.5 rounded-xl shadow-xl backdrop-blur-md border border-white/10 z-50">
+          Buku Keuangan
+        </div>
+      </div>
+
+    </div>
+    <div class="fixed left-0 top-1/2 -translate-y-1/2 w-1.5 h-28 bg-emerald-600/50 rounded-r-full group-hover/leftdock:opacity-0 transition-opacity"></div>
+  </div>
+
+
+  <!-- ==================== DOCK KANAN (RIGHT DOCK) ==================== -->
+  <div id="rightDockTrigger" class="fixed right-0 top-0 bottom-0 w-8 z-[80] group/rightdock">
+    <div class="fixed right-3 top-1/2 -translate-y-1/2 z-[90] bg-white/85 backdrop-blur-2xl border border-slate-200/90 shadow-2xl shadow-slate-900/15 rounded-3xl p-2.5 flex flex-col gap-3 transition-all duration-300 transform translate-x-[calc(100%+20px)] group-hover/rightdock:translate-x-0">
+      
+      <div class="text-[9px] font-extrabold text-slate-400 text-center uppercase tracking-widest py-1 border-b border-slate-100">
+        Menu
+      </div>
+
+      <div class="relative group/icon">
+        <button onclick="switchTab('tab-daftar')" class="dock-icon w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-lg shadow-emerald-600/30">
+          <i class="fa-solid fa-pen-to-square text-base"></i>
+        </button>
+        <div class="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 group-hover/icon:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap bg-slate-900/90 text-white text-[11px] font-semibold px-3 py-1.5 rounded-xl shadow-xl backdrop-blur-md border border-white/10 z-50">
+          Pendaftaran Tes
+        </div>
+      </div>
+
+      <div class="relative group/icon">
+        <button onclick="switchTab('tab-keputusan')" class="dock-icon w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center shadow-lg shadow-blue-600/30">
+          <i class="fa-solid fa-clipboard-check text-base"></i>
+        </button>
+        <div class="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 group-hover/icon:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap bg-slate-900/90 text-white text-[11px] font-semibold px-3 py-1.5 rounded-xl shadow-xl backdrop-blur-md border border-white/10 z-50">
+          Input Keputusan
+        </div>
+      </div>
+
+      <div class="relative group/icon">
+        <button onclick="switchTab('tab-tagihan')" class="dock-icon w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-400 text-white flex items-center justify-center shadow-lg shadow-amber-500/30">
+          <i class="fa-solid fa-file-invoice-dollar text-base"></i>
+        </button>
+        <div class="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 group-hover/icon:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap bg-slate-900/90 text-white text-[11px] font-semibold px-3 py-1.5 rounded-xl shadow-xl backdrop-blur-md border border-white/10 z-50">
+          Tagihan Santri
+        </div>
+      </div>
+
+      <div class="relative group/icon">
+        <button onclick="switchTab('tab-badal')" class="dock-icon w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-500 text-white flex items-center justify-center shadow-lg shadow-indigo-600/30">
+          <i class="fa-solid fa-user-tie text-base"></i>
+        </button>
+        <div class="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 group-hover/icon:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap bg-slate-900/90 text-white text-[11px] font-semibold px-3 py-1.5 rounded-xl shadow-xl backdrop-blur-md border border-white/10 z-50">
+          Status Badal Tes
+        </div>
+      </div>
+
+      <div class="relative group/icon">
+        <button onclick="switchTab('tab-keuangan')" class="dock-icon w-11 h-11 rounded-2xl bg-gradient-to-tr from-rose-600 to-pink-500 text-white flex items-center justify-center shadow-lg shadow-rose-600/30">
+          <i class="fa-solid fa-wallet text-base"></i>
+        </button>
+        <div class="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 group-hover/icon:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap bg-slate-900/90 text-white text-[11px] font-semibold px-3 py-1.5 rounded-xl shadow-xl backdrop-blur-md border border-white/10 z-50">
+          Buku Keuangan
+        </div>
+      </div>
+
+    </div>
+    <div class="fixed right-0 top-1/2 -translate-y-1/2 w-1.5 h-28 bg-emerald-600/50 rounded-l-full group-hover/rightdock:opacity-0 transition-opacity"></div>
+  </div>
+
+
+  <!-- Header / Navbar macOS Style -->
+  <header class="bg-white/80 backdrop-blur-xl border-b border-slate-200/80 sticky top-0 z-50 shadow-sm px-4 sm:px-8">
+    <div class="max-w-7xl mx-auto py-3 flex flex-wrap justify-between items-center gap-4">
+      
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5 mr-2">
+          <span class="w-3 h-3 rounded-full bg-rose-500 border border-rose-600/30 inline-block shadow-sm"></span>
+          <span class="w-3 h-3 rounded-full bg-amber-400 border border-amber-500/30 inline-block shadow-sm"></span>
+          <span class="w-3 h-3 rounded-full bg-emerald-500 border border-emerald-600/30 inline-block shadow-sm"></span>
+        </div>
+        <div class="h-5 w-px bg-slate-200 mx-1"></div>
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-700 via-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-md shadow-emerald-600/20">
+            <i class="fa-solid fa-quran text-base"></i>
+          </div>
+          <div>
+            <h1 id="activeMenuTitle" class="font-bold text-slate-900 text-sm tracking-tight leading-tight">Pendaftaran Tes Berkala</h1>
+            <p class="text-[10px] text-slate-500 font-medium">Sidogiri Tahfidz System • Geser kursor ke samping kiri/kanan untuk menu</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Indikator Koneksi & Control Hijriah -->
+      <div class="flex items-center gap-2.5">
+        <button onclick="manualSync()" title="Tarik data terbaru dari Spreadsheet" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition border border-slate-200">
+          <i id="syncIconBtn" class="fa-solid fa-rotate text-xs"></i>
+        </button>
+
+        <div id="syncBadge" class="bg-slate-100/80 border border-slate-200 px-3 py-1.5 rounded-full text-xs flex items-center gap-2 transition-all">
+          <span id="syncDot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span id="syncText" class="font-semibold text-slate-600 text-[11px]">Online</span>
+        </div>
+
+        <div class="bg-slate-100/90 border border-slate-200 px-3 py-1.5 rounded-2xl text-xs flex items-center gap-2.5 shadow-inner">
+          <i class="fa-regular fa-calendar-check text-emerald-600 text-sm"></i>
+          <div>
+            <div class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Hari Ini (Hijriah)</div>
+            <div id="displayHijriHeader" class="font-bold text-slate-800 text-[11px]">Memuat...</div>
+          </div>
+          <div class="flex gap-1 ml-1 pl-2 border-l border-slate-200">
+            <button onclick="adjustHijriOffset(-1)" class="w-5 h-5 rounded-md bg-white hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center shadow-sm border border-slate-200 transition">-</button>
+            <button onclick="adjustHijriOffset(1)" class="w-5 h-5 rounded-md bg-white hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center shadow-sm border border-slate-200 transition">+</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 mt-6">
+
+    <!-- TAB 1: FORM PENDAFTARAN TES -->
+    <section id="tab-daftar" class="tab-content">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <div class="lg:col-span-2 bg-white/90 backdrop-blur-md rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200/80 p-6">
+          <h2 class="text-base font-bold text-slate-800 border-b border-slate-100 pb-3 mb-5 flex items-center gap-2.5">
+            <span class="w-2 h-5 bg-emerald-600 rounded-full inline-block"></span>
+            Form Pendaftaran Tes Berkala
+          </h2>
+
+          <form id="formPendaftaran" onsubmit="submitPendaftaran(event)" class="space-y-5">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5 tracking-wider">ID PPS Santri * <span class="text-[10px] text-emerald-600 font-normal lowercase">(tekan enter untuk cari cepat)</span></label>
+              <div class="relative flex items-center">
+                <input type="text" id="inputPpsDaftar" required 
+                  onkeydown="if(event.key==='Enter'){ event.preventDefault(); cariSantri(); }"
+                  placeholder="Ketik ID PPS lalu tekan ENTER (Contoh: 14360213)" 
+                  class="w-full pl-4 pr-24 py-3 rounded-xl bg-slate-50 border border-slate-200/90 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none text-sm font-mono transition-all">
+                <button type="button" onclick="cariSantri()" class="absolute right-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
+                  <i class="fa-solid fa-magnifying-glass"></i> Cari
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50/80 p-4 rounded-xl border border-slate-200/70">
+              <div>
+                <span class="block text-[10px] text-slate-400 font-bold uppercase">Nama Santri (Kolom B)</span>
+                <span id="resNama" class="font-bold text-slate-800 text-sm mt-0.5 block">-</span>
+              </div>
+              <div>
+                <span class="block text-[10px] text-slate-400 font-bold uppercase">Jalsah (Kolom F)</span>
+                <span id="resJalsah" class="font-bold text-slate-800 text-sm mt-0.5 block">-</span>
+              </div>
+              <div>
+                <span class="block text-[10px] text-slate-400 font-bold uppercase">Juz Akhir (Kolom S)</span>
+                <span id="resJuzAkhir" class="font-extrabold text-emerald-700 text-sm mt-0.5 block">-</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="relative">
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5 tracking-wider">Pilih Tahap Tes *</label>
+                <input type="hidden" id="selectTahap" value="" required>
+                
+                <button type="button" id="btnDropdownTahap" onclick="toggleDropdown('tahap')" 
+                  class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200/90 text-left text-sm font-semibold text-slate-700 flex justify-between items-center focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+                  <span id="labelTahapSelected" class="text-slate-400 font-normal">-- Pilih Tahap --</span>
+                  <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform" id="arrowTahap"></i>
+                </button>
+
+                <div id="menuTahap" class="hidden absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-2xl border border-slate-200/90 rounded-2xl shadow-2xl shadow-slate-900/15 z-50 p-2 space-y-1 max-h-60 overflow-y-auto">
+                  <div onclick="selectTahapOption('Tahap 1', 'Juz 28 - 30')" class="p-2.5 rounded-xl hover:bg-emerald-50 hover:text-emerald-900 cursor-pointer text-xs font-semibold flex justify-between items-center transition">
+                    <span>Tahap 1 (Juz 28 - 30)</span> <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">3 Hari</span>
+                  </div>
+                  <div onclick="selectTahapOption('Tahap 2', 'Juz 1 - 5')" class="p-2.5 rounded-xl hover:bg-emerald-50 hover:text-emerald-900 cursor-pointer text-xs font-semibold flex justify-between items-center transition">
+                    <span>Tahap 2 (Juz 1 - 5)</span> <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">5 Hari</span>
+                  </div>
+                  <div onclick="selectTahapOption('Tahap 3', 'Juz 6 - 10')" class="p-2.5 rounded-xl hover:bg-emerald-50 hover:text-emerald-900 cursor-pointer text-xs font-semibold flex justify-between items-center transition">
+                    <span>Tahap 3 (Juz 6 - 10)</span> <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">5 Hari</span>
+                  </div>
+                  <div onclick="selectTahapOption('Tahap 4', 'Juz 11 - 15')" class="p-2.5 rounded-xl hover:bg-emerald-50 hover:text-emerald-900 cursor-pointer text-xs font-semibold flex justify-between items-center transition">
+                    <span>Tahap 4 (Juz 11 - 15)</span> <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">5 Hari</span>
+                  </div>
+                  <div onclick="selectTahapOption('Tahap 5', 'Juz 16 - 20')" class="p-2.5 rounded-xl hover:bg-emerald-50 hover:text-emerald-900 cursor-pointer text-xs font-semibold flex justify-between items-center transition">
+                    <span>Tahap 5 (Juz 16 - 20)</span> <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">5 Hari</span>
+                  </div>
+                  <div onclick="selectTahapOption('Tahap 6', 'Juz 21 - 27')" class="p-2.5 rounded-xl hover:bg-emerald-50 hover:text-emerald-900 cursor-pointer text-xs font-semibold flex justify-between items-center transition">
+                    <span>Tahap 6 (Juz 21 - 27)</span> <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">7 Hari</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5 tracking-wider">Cakupan Juz</label>
+                <input type="text" id="displayJuz" readonly class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-100/70 text-slate-600 text-sm font-bold" placeholder="-">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5 tracking-wider">Tanggal Mulai (Hijriyah) *</label>
+                <div class="grid grid-cols-3 gap-1.5">
+                  <input type="number" id="hijriMulaiTgl" min="1" max="30" placeholder="Tgl" onchange="hitungTglSelesaiHijri()" required class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-center focus:bg-white focus:border-emerald-500 outline-none">
+                  <select id="hijriMulaiBln" onchange="hitungTglSelesaiHijri()" required class="p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:bg-white focus:border-emerald-500 outline-none">
+                  </select>
+                  <input type="number" id="hijriMulaiThn" placeholder="Thn" onchange="hitungTglSelesaiHijri()" required class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-center focus:bg-white focus:border-emerald-500 outline-none">
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5 tracking-wider">Perkiraan Selesai (Hijriyah)</label>
+                <input type="text" id="displayHijriSelesai" readonly class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-100/70 text-emerald-800 text-sm font-bold" placeholder="-">
+              </div>
+            </div>
+
+            <div class="relative">
+              <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5 tracking-wider">Penguji / Badal Tes *</label>
+              <input type="hidden" id="selectBadal" value="" required>
+
+              <button type="button" id="btnDropdownBadal" onclick="toggleDropdown('badal')" 
+                class="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200/90 text-left text-sm font-semibold text-slate-700 flex justify-between items-center focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+                <span id="labelBadalSelected" class="text-slate-400 font-normal">-- Pilih Badal Tes --</span>
+                <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform" id="arrowBadal"></i>
+              </button>
+
+              <div id="menuBadal" class="hidden absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-2xl border border-slate-200/90 rounded-2xl shadow-2xl shadow-slate-900/15 z-50 p-2 space-y-1.5 max-h-64 overflow-y-auto">
+              </div>
+            </div>
+
+            <div class="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-200/60 space-y-2.5">
+              <div class="flex justify-between items-center">
+                <span class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Biaya Administrasi Tes</span>
+                <span class="text-base font-black text-emerald-700 bg-emerald-100/80 px-3 py-1 rounded-full">Rp 10.000</span>
+              </div>
+              <div class="flex items-center gap-6 pt-1 border-t border-emerald-100">
+                <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700">
+                  <input type="radio" name="statusBayar" value="Lunas" checked class="text-emerald-600 focus:ring-emerald-500">
+                  Bayar Langsung (Lunas)
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700">
+                  <input type="radio" name="statusBayar" value="Belum Lunas" class="text-emerald-600 focus:ring-emerald-500">
+                  Masukan ke Tagihan
+                </label>
+              </div>
+            </div>
+
+            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-emerald-600/20 flex justify-center items-center gap-2 text-sm">
+              <i class="fa-solid fa-paper-plane"></i> Daftarkan Tes Berkala
+            </button>
+          </form>
+        </div>
+
+        <div class="space-y-6">
+          <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200/80 p-5">
+            <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider mb-3 border-b border-slate-100 pb-2 flex items-center gap-2">
+              <i class="fa-solid fa-circle-info text-blue-500"></i> Ketentuan Durasi Tahap
+            </h3>
+            <ul class="text-xs text-slate-600 space-y-2 font-medium">
+              <li class="p-2.5 bg-slate-50/80 rounded-xl border border-slate-200/60 flex justify-between"><span><b>Tahap 1:</b> Juz 28-30</span> <span class="text-slate-400 font-semibold">3 Hari</span></li>
+              <li class="p-2.5 bg-slate-50/80 rounded-xl border border-slate-200/60 flex justify-between"><span><b>Tahap 2:</b> Juz 1-5</span> <span class="text-slate-400 font-semibold">5 Hari</span></li>
+              <li class="p-2.5 bg-slate-50/80 rounded-xl border border-slate-200/60 flex justify-between"><span><b>Tahap 3:</b> Juz 6-10</span> <span class="text-slate-400 font-semibold">5 Hari</span></li>
+              <li class="p-2.5 bg-slate-50/80 rounded-xl border border-slate-200/60 flex justify-between"><span><b>Tahap 4:</b> Juz 11-15</span> <span class="text-slate-400 font-semibold">5 Hari</span></li>
+              <li class="p-2.5 bg-slate-50/80 rounded-xl border border-slate-200/60 flex justify-between"><span><b>Tahap 5:</b> Juz 16-20</span> <span class="text-slate-400 font-semibold">5 Hari</span></li>
+              <li class="p-2.5 bg-slate-50/80 rounded-xl border border-slate-200/60 flex justify-between"><span><b>Tahap 6:</b> Juz 21-27</span> <span class="text-slate-400 font-semibold">7 Hari</span></li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 2: KEPUTUSAN LULUS / TIDAK LULUS -->
+    <section id="tab-keputusan" class="tab-content hidden">
+      <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200/80 p-6">
+        <h2 class="text-base font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2.5">
+          <span class="w-2 h-5 bg-blue-600 rounded-full inline-block"></span>
+          Daftar Peserta & Input Keputusan Tes
+        </h2>
+        
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-100/80 text-slate-500 font-bold border-b border-slate-200 uppercase tracking-wider">
+                <th class="p-3.5 rounded-l-xl">Tgl Hijriah</th>
+                <th class="p-3.5">ID PPS / Nama</th>
+                <th class="p-3.5">Tahap / Juz</th>
+                <th class="p-3.5">Penguji (Badal)</th>
+                <th class="p-3.5">Status Bayar</th>
+                <th class="p-3.5">Keputusan</th>
+                <th class="p-3.5 text-center rounded-r-xl">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tableTesBody" class="divide-y divide-slate-100 font-medium">
+              <tr><td colspan="7" class="p-4 text-center text-slate-400">Memuat data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: TAGIHAN SANTRI -->
+    <section id="tab-tagihan" class="tab-content hidden">
+      <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200/80 p-6 max-w-3xl mx-auto">
+        <h2 class="text-base font-bold text-slate-800 border-b border-slate-100 pb-3 mb-5 flex items-center gap-2.5">
+          <span class="w-2 h-5 bg-amber-500 rounded-full inline-block"></span>
+          Cek Tagihan Tes Santri
+        </h2>
+
+        <div class="flex gap-2 mb-6">
+          <input type="text" id="searchTagihanPps" placeholder="Ketik ID PPS lalu tekan ENTER" 
+            onkeydown="if(event.key==='Enter'){ event.preventDefault(); cariTagihanSantri(); }"
+            class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200/90 focus:bg-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none text-sm font-mono transition-all">
+          <button onclick="cariTagihanSantri()" class="bg-amber-600 hover:bg-amber-700 text-white px-5 py-3 rounded-xl text-xs font-semibold transition shadow-md shadow-amber-600/20 shrink-0">
+            Cek Tagihan
+          </button>
+        </div>
+
+        <div id="hasilTagihan" class="hidden space-y-4">
+          <div class="bg-slate-50/80 p-4 rounded-2xl border border-slate-200/80 flex justify-between items-center">
+            <div>
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Tagihan Santri</span>
+              <div id="infoSantriTagihan" class="font-bold text-slate-800 text-sm mt-0.5"></div>
+            </div>
+            <div id="totalTagihanVal" class="text-2xl font-black text-rose-600 bg-rose-50 border border-rose-200/60 px-4 py-1.5 rounded-2xl">Rp 0</div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border border-slate-200/70 rounded-xl overflow-hidden">
+              <thead class="bg-slate-100/80 font-bold border-b border-slate-200 text-slate-500 uppercase">
+                <tr>
+                  <th class="p-3">Tahap</th>
+                  <th class="p-3">Juz</th>
+                  <th class="p-3">Biaya</th>
+                  <th class="p-3">Status</th>
+                </tr>
+              </thead>
+              <tbody id="listTagihanBody" class="divide-y divide-slate-100 font-medium"></tbody>
+            </table>
+          </div>
+
+          <button id="btnBayarTagihan" onclick="prosesPelunasanTagihan()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-emerald-600/20 text-sm">
+            Pelunasan Tagihan Sekarang
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: STATUS BADAL TES -->
+    <section id="tab-badal" class="tab-content hidden">
+      <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200/80 p-6">
+        <h2 class="text-base font-bold text-slate-800 border-b border-slate-100 pb-3 mb-5 flex items-center gap-2.5">
+          <span class="w-2 h-5 bg-indigo-600 rounded-full inline-block"></span>
+          Status & Beban Pengujian Badal Tes
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="badalGrid">
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: BUKU KEUANGAN -->
+    <section id="tab-keuangan" class="tab-content hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200/80 p-6">
+          <h2 class="text-base font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2.5">
+            <span class="w-2 h-5 bg-rose-600 rounded-full inline-block"></span>
+            Catat Transaksi Kas
+          </h2>
+          <form onsubmit="submitKeuanganManual(event)" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Jenis Transaksi</label>
+              <select id="keuJenis" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold outline-none focus:bg-white focus:border-rose-500">
+                <option value="Pemasukan">Pemasukan (+)</option>
+                <option value="Pengeluaran">Pengeluaran (-)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Kategori</label>
+              <input type="text" id="keuKategori" required placeholder="Contoh: Operasional, ATK" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs outline-none focus:bg-white focus:border-rose-500">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nominal (Rp)</label>
+              <input type="number" id="keuNominal" required placeholder="10000" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono font-bold outline-none focus:bg-white focus:border-rose-500">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Keterangan</label>
+              <textarea id="keuKet" rows="2" placeholder="Catatan transaksi..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs outline-none focus:bg-white focus:border-rose-500"></textarea>
+            </div>
+            <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl text-xs transition shadow-md">
+              Simpan Transaksi
+            </button>
+          </form>
+        </div>
+
+        <div class="lg:col-span-2 space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-emerald-50/80 border border-emerald-200/80 p-4 rounded-2xl">
+              <span class="block text-[10px] text-emerald-700 font-bold uppercase tracking-wider">Total Pemasukan</span>
+              <span id="statPemasukan" class="text-xl font-black text-emerald-800 mt-0.5 block">Rp 0</span>
+            </div>
+            <div class="bg-rose-50/80 border border-rose-200/80 p-4 rounded-2xl">
+              <span class="block text-[10px] text-rose-700 font-bold uppercase tracking-wider">Total Pengeluaran</span>
+              <span id="statPengeluaran" class="text-xl font-black text-rose-800 mt-0.5 block">Rp 0</span>
+            </div>
+            <div class="bg-blue-50/80 border border-blue-200/80 p-4 rounded-2xl">
+              <span class="block text-[10px] text-blue-700 font-bold uppercase tracking-wider">Saldo Kas</span>
+              <span id="statSaldo" class="text-xl font-black text-blue-800 mt-0.5 block">Rp 0</span>
+            </div>
+          </div>
+
+          <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200/80 p-5">
+            <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider mb-3">Jurnal Mutasi Keuangan</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="bg-slate-100/80 font-bold border-b border-slate-200 text-slate-500 uppercase">
+                    <th class="p-3 rounded-l-xl">Waktu (Hijriah)</th>
+                    <th class="p-3">Jenis</th>
+                    <th class="p-3">Kategori</th>
+                    <th class="p-3">Nominal</th>
+                    <th class="p-3">Keterangan</th>
+                    <th class="p-3 text-center rounded-r-xl">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="keuanganBody" class="divide-y divide-slate-100 font-medium">
+                  <tr><td colspan="6" class="p-3 text-center text-slate-400">Belum ada data...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbyxUxHHN179eb5XfsyX3YIg3ljfDbXlnoM6xLKgt2ml4CTxntoRUcxg3_vtiBqgcwVy/exec";
+
+    const HIJRI_MONTHS = [
+      "Muharram", "Safar", "Rabi'ul Awal", "Rabi'ul Akhir",
+      "Jumadil Awal", "Jumadil Akhir", "Rajab", "Sya'ban",
+      "Ramadhan", "Syawal", "Dzulqa'dah", "Dzulhijjah"
+    ];
+
+    const TAHAP_RULES = {
+      'Tahap 1': { juz: 'Juz 28 - 30', days: 3 },
+      'Tahap 2': { juz: 'Juz 1 - 5', days: 5 },
+      'Tahap 3': { juz: 'Juz 6 - 10', days: 5 },
+      'Tahap 4': { juz: 'Juz 11 - 15', days: 5 },
+      'Tahap 5': { juz: 'Juz 16 - 20', days: 5 },
+      'Tahap 6': { juz: 'Juz 21 - 27', days: 7 }
+    };
+
+    const TAB_NAMES = {
+      'tab-daftar': 'Pendaftaran Tes Berkala',
+      'tab-keputusan': 'Input Keputusan Tes',
+      'tab-tagihan': 'Tagihan Tes Santri',
+      'tab-badal': 'Status Badal Tes',
+      'tab-keuangan': 'Jurnal Keuangan Kas'
+    };
+
+    let DB_SANTRI = [];
+    let DB_BADAL = [];
+    let DB_TES = [];
+    let DB_KEUANGAN = [];
+    let isSyncing = false;
+
+    // --- CUSTOM macOS CONFIRM MODAL CONTROLLER ---
+    let pendingConfirmCallback = null;
+
+    function showMacConfirm(title, msg, onConfirm) {
+      document.getElementById('macModalTitle').innerText = title;
+      document.getElementById('macModalMsg').innerText = msg;
+      pendingConfirmCallback = onConfirm;
+
+      const modal = document.getElementById('macModal');
+      const card = document.getElementById('macModalCard');
+
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        card.classList.remove('scale-95', 'opacity-0');
+        card.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+
+    function closeMacModal() {
+      const modal = document.getElementById('macModal');
+      const card = document.getElementById('macModalCard');
+
+      card.classList.remove('scale-100', 'opacity-100');
+      card.classList.add('scale-95', 'opacity-0');
+
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        pendingConfirmCallback = null;
+      }, 200);
+    }
+
+    document.getElementById('macModalConfirmBtn').onclick = function() {
+      if (pendingConfirmCallback) pendingConfirmCallback();
+      closeMacModal();
+    };
+
+    // CUSTOM DROPDOWN CONTROL
+    function toggleDropdown(type) {
+      const menu = type === 'tahap' ? document.getElementById('menuTahap') : document.getElementById('menuBadal');
+      const arrow = type === 'tahap' ? document.getElementById('arrowTahap') : document.getElementById('arrowBadal');
+      
+      const isHidden = menu.classList.contains('hidden');
+      closeAllDropdowns();
+
+      if (isHidden) {
+        menu.classList.remove('hidden');
+        arrow.classList.add('rotate-180');
+      }
+    }
+
+    function closeAllDropdowns() {
+      document.getElementById('menuTahap').classList.add('hidden');
+      document.getElementById('menuBadal').classList.add('hidden');
+      document.getElementById('arrowTahap').classList.remove('rotate-180');
+      document.getElementById('arrowBadal').classList.remove('rotate-180');
+    }
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('#btnDropdownTahap') && !e.target.closest('#menuTahap') &&
+          !e.target.closest('#btnDropdownBadal') && !e.target.closest('#menuBadal')) {
+        closeAllDropdowns();
+      }
+    });
+
+    function selectTahapOption(tahap, juzText) {
+      document.getElementById('selectTahap').value = tahap;
+      document.getElementById('labelTahapSelected').innerHTML = `<b class="text-slate-800">${tahap}</b> (${juzText})`;
+      document.getElementById('displayJuz').value = juzText;
+      closeAllDropdowns();
+      hitungTglSelesaiHijri();
+    }
+
+    function selectBadalOption(id, nama) {
+      document.getElementById('selectBadal').value = id + "|" + nama;
+      document.getElementById('labelBadalSelected').innerHTML = `<b class="text-slate-800">${nama}</b> <span class="text-[10px] text-slate-400 font-mono">(${id})</span>`;
+      closeAllDropdowns();
+    }
+
+    // Toast Handler
+    function showMacToast(title, msg, type = 'success') {
+      const toast = document.getElementById('macToast');
+      const icon = document.getElementById('toastIcon');
+      document.getElementById('toastTitle').innerText = title;
+      document.getElementById('toastMsg').innerText = msg;
+
+      if (type === 'error') {
+        icon.className = "w-8 h-8 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center font-bold shrink-0";
+        icon.innerHTML = `<i class="fa-solid fa-circle-exclamation text-sm"></i>`;
+      } else {
+        icon.className = "w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold shrink-0";
+        icon.innerHTML = `<i class="fa-solid fa-check text-sm"></i>`;
+      }
+
+      toast.classList.remove('-translate-y-24', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('-translate-y-24', 'opacity-0', 'pointer-events-none');
+      }, 3500);
+    }
+
+    // --- INDEXEDDB HELPER ---
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open('TahfidzTesDB', 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('cache')) db.createObjectStore('cache');
+          if (!db.objectStoreNames.contains('queue')) db.createObjectStore('queue', { autoIncrement: true });
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function setLocalCache(key, val) {
+      const db = await openDB();
+      const tx = db.transaction('cache', 'readwrite');
+      tx.objectStore('cache').put(val, key);
+    }
+
+    async function getLocalCache(key) {
+      const db = await openDB();
+      return new Promise(resolve => {
+        const req = db.transaction('cache', 'readonly').objectStore('cache').get(key);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => resolve(null);
+      });
+    }
+
+    async function addSyncQueue(action, payload) {
+      const db = await openDB();
+      const tx = db.transaction('queue', 'readwrite');
+      tx.objectStore('queue').add({ action, payload, timestamp: Date.now() });
+    }
+
+    async function getSyncQueue() {
+      const db = await openDB();
+      return new Promise(resolve => {
+        const req = db.transaction('queue', 'readonly').objectStore('queue').openCursor();
+        const items = [];
+        req.onsuccess = (e) => {
+          const cursor = e.target.result;
+          if (cursor) {
+            items.push({ id: cursor.key, ...cursor.value });
+            cursor.continue();
+          } else {
+            resolve(items);
+          }
+        };
+      });
+    }
+
+    async function clearQueueItem(id) {
+      const db = await openDB();
+      const tx = db.transaction('queue', 'readwrite');
+      tx.objectStore('queue').delete(id);
+    }
+
+    // --- KALENDER HIJRIAH ---
+    function getHijriOffset() {
+      return parseInt(localStorage.getItem('hijriOffset') || '0');
+    }
+
+    function adjustHijriOffset(val) {
+      const current = getHijriOffset();
+      localStorage.setItem('hijriOffset', current + val);
+      initHijriDateInputs();
+      showMacToast("Offset Hijriah Diubah", `Offset tanggal disesuaikan: ${current + val} hari`);
+    }
+
+    function getTodayHijri() {
+      const d = new Date();
+      d.setDate(d.getDate() + getHijriOffset());
+      
+      try {
+        const formatter = new Intl.DateTimeFormat('en-TN-u-ca-islamic-umalqura', {
+          day: 'numeric', month: 'numeric', year: 'numeric'
+        });
+        const parts = formatter.formatToParts(d);
+        let day = 1, month = 1, year = 1448;
+        parts.forEach(p => {
+          if (p.type === 'day') day = parseInt(p.value);
+          if (p.type === 'month') month = parseInt(p.value);
+          if (p.type === 'year') year = parseInt(p.value);
+        });
+        return { day, month, year, monthName: HIJRI_MONTHS[month - 1] };
+      } catch(e) {
+        return { day: 1, month: 1, year: 1448, monthName: HIJRI_MONTHS[0] };
+      }
+    }
+
+    function initHijriDateInputs() {
+      const h = getTodayHijri();
+      document.getElementById('displayHijriHeader').innerText = `${h.day} ${h.monthName} ${h.year} H`;
+
+      const selectBln = document.getElementById('hijriMulaiBln');
+      selectBln.innerHTML = '';
+      HIJRI_MONTHS.forEach((m, idx) => {
+        const opt = document.createElement('option');
+        opt.value = idx + 1;
+        opt.innerText = m;
+        if (idx + 1 === h.month) opt.selected = true;
+        selectBln.appendChild(opt);
+      });
+
+      document.getElementById('hijriMulaiTgl').value = h.day;
+      document.getElementById('hijriMulaiThn').value = h.year;
+      hitungTglSelesaiHijri();
+    }
+
+    function hitungTglSelesaiHijri() {
+      const tgl = parseInt(document.getElementById('hijriMulaiTgl').value) || 1;
+      const blnIdx = parseInt(document.getElementById('hijriMulaiBln').value) - 1;
+      let thn = parseInt(document.getElementById('hijriMulaiThn').value) || 1448;
+
+      const valTahap = document.getElementById('selectTahap').value;
+      if (!valTahap || !TAHAP_RULES[valTahap]) {
+        document.getElementById('displayHijriSelesai').value = "-";
+        return;
+      }
+
+      const daysToAdd = TAHAP_RULES[valTahap].days - 1;
+      let endDay = tgl + daysToAdd;
+      let endBlnIdx = blnIdx;
+
+      if (endDay > 30) {
+        endDay -= 30;
+        endBlnIdx++;
+        if (endBlnIdx >= 12) {
+          endBlnIdx = 0;
+          thn++;
+        }
+      }
+
+      document.getElementById('displayHijriSelesai').value = `${endDay} ${HIJRI_MONTHS[endBlnIdx]} ${thn} H`;
+    }
+
+    function getFormattedMulaiHijri() {
+      const tgl = document.getElementById('hijriMulaiTgl').value;
+      const blnIdx = parseInt(document.getElementById('hijriMulaiBln').value) - 1;
+      const thn = document.getElementById('hijriMulaiThn').value;
+      return `${tgl} ${HIJRI_MONTHS[blnIdx]} ${thn} H`;
+    }
+
+    // --- INITIALIZATION ---
+    window.onload = async function() {
+      initHijriDateInputs();
+      await loadFromLocal();
+      triggerSync();
+
+      window.addEventListener('online', triggerSync);
+      window.addEventListener('offline', updateOnlineStatusUI);
+    };
+
+    function updateOnlineStatusUI() {
+      const dot = document.getElementById('syncDot');
+      const txt = document.getElementById('syncText');
+
+      if (navigator.onLine) {
+        if (isSyncing) {
+          dot.className = "w-2 h-2 rounded-full bg-amber-400 animate-ping";
+          txt.innerText = "Menyinkronkan...";
+        } else {
+          dot.className = "w-2 h-2 rounded-full bg-emerald-500";
+          txt.innerText = "Online";
+        }
+      } else {
+        dot.className = "w-2 h-2 rounded-full bg-rose-500";
+        txt.innerText = "Offline (Lokal)";
+      }
+    }
+
+    async function loadFromLocal() {
+      DB_SANTRI = (await getLocalCache('santri')) || [];
+      DB_BADAL = (await getLocalCache('badal')) || [];
+      DB_TES = (await getLocalCache('tes')) || [];
+      DB_KEUANGAN = (await getLocalCache('keuangan')) || [];
+
+      renderAllUI();
+    }
+
+    function renderAllUI() {
+      renderBadalDropdown();
+      renderTableTes();
+      renderBadalGrid();
+      renderKeuangan();
+    }
+
+    function manualSync() {
+      const icon = document.getElementById('syncIconBtn');
+      icon.classList.add('animate-spin');
+      showMacToast("Pembaruan Data", "Menarik data terbaru dari Spreadsheet...");
+      triggerSync().then(() => {
+        setTimeout(() => icon.classList.remove('animate-spin'), 1000);
+      });
+    }
+
+    // --- SINKRONISASI MURNI ---
+    async function triggerSync() {
+      updateOnlineStatusUI();
+      if (!navigator.onLine || isSyncing) return;
+
+      isSyncing = true;
+      updateOnlineStatusUI();
+
+      try {
+        const queue = await getSyncQueue();
+        for (let item of queue) {
+          try {
+            await fetch(API_URL, {
+              method: 'POST',
+              body: JSON.stringify({ action: item.action, payload: item.payload })
+            });
+            await clearQueueItem(item.id);
+          } catch(err) {
+            console.error("Gagal sync item antrian:", err);
+            break;
+          }
+        }
+
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'GET_ALL_TES_DATA' })
+        }).then(r => r.json());
+
+        if (res.success) {
+          DB_SANTRI = (res.santri && res.santri.rows) ? res.santri.rows : [];
+          DB_BADAL = (res.badal && res.badal.rows) ? res.badal.rows : [];
+          DB_TES = (res.tes && res.tes.rows) ? res.tes.rows : [];
+          DB_KEUANGAN = (res.keuangan && res.keuangan.rows) ? res.keuangan.rows : [];
+
+          await setLocalCache('santri', DB_SANTRI);
+          await setLocalCache('badal', DB_BADAL);
+          await setLocalCache('tes', DB_TES);
+          await setLocalCache('keuangan', DB_KEUANGAN);
+
+          renderAllUI();
+        }
+      } catch(e) {
+        console.warn("Sync terhenti (Masih Offline / Koneksi Terputus)");
+      } finally {
+        isSyncing = false;
+        updateOnlineStatusUI();
+      }
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
+
+      if(TAB_NAMES[tabId]) {
+        document.getElementById('activeMenuTitle').innerText = TAB_NAMES[tabId];
+      }
+    }
+
+    function cariSantri() {
+      const ppsInput = document.getElementById('inputPpsDaftar').value.trim();
+      if(!ppsInput) return;
+
+      const found = DB_SANTRI.find(row => String(row[0]).trim() === ppsInput);
+
+      if (found) {
+        document.getElementById('resNama').innerText = found[1] || "-";
+        document.getElementById('resJalsah').innerText = found[5] || "-";
+        document.getElementById('resJuzAkhir').innerText = found[18] || found[17] || "-";
+        showMacToast("Data Ditemukan", `${found[1]} (${found[5] || 'Santri'})`);
+      } else {
+        showMacToast("ID Tidak Ada", "ID PPS tidak ditemukan di database!", "error");
+        document.getElementById('resNama').innerText = "-";
+        document.getElementById('resJalsah').innerText = "-";
+        document.getElementById('resJuzAkhir').innerText = "-";
+      }
+    }
+
+    async function submitPendaftaran(e) {
+      e.preventDefault();
+      const idPps = document.getElementById('inputPpsDaftar').value.trim();
+      const nama = document.getElementById('resNama').innerText;
+
+      if (!nama || nama === "-") {
+        showMacToast("Lengkapi Data", "Silihkan cari ID PPS santri terlebih dahulu!", "error");
+        return;
+      }
+
+      const badalVal = document.getElementById('selectBadal').value;
+      if (!badalVal) { 
+        showMacToast("Pilih Badal", "Pilih penguji/badal tes terlebih dahulu!", "error");
+        return; 
+      }
+
+      const [idBadal, namaBadal] = badalVal.split('|');
+      const tahap = document.getElementById('selectTahap').value;
+      const juz = document.getElementById('displayJuz').value;
+      const tglMulai = getFormattedMulaiHijri();
+      const tglSelesai = document.getElementById('displayHijriSelesai').value;
+      const statusBayar = document.querySelector('input[name="statusBayar"]:checked').value;
+
+      const newRecord = [
+        tglMulai, "REG-" + Date.now(), idPps, nama, document.getElementById('resJalsah').innerText,
+        tahap, juz, tglMulai, tglSelesai, idBadal, namaBadal, 10000, statusBayar, "Proses Tes", "-"
+      ];
+
+      DB_TES.unshift(newRecord);
+      if (statusBayar === 'Lunas') {
+        DB_KEUANGAN.unshift([
+          tglMulai, "Pemasukan", "Biaya Tes Berkala", idPps, nama, 10000, "Pendaftaran " + tahap
+        ]);
+        await setLocalCache('keuangan', DB_KEUANGAN);
+      }
+      await setLocalCache('tes', DB_TES);
+
+      renderAllUI();
+      document.getElementById('formPendaftaran').reset();
+      document.getElementById('resNama').innerText = "-";
+      document.getElementById('resJalsah').innerText = "-";
+      document.getElementById('resJuzAkhir').innerText = "-";
+      document.getElementById('selectTahap').value = "";
+      document.getElementById('selectBadal').value = "";
+      document.getElementById('labelTahapSelected').innerText = "-- Pilih Tahap --";
+      document.getElementById('labelBadalSelected').innerText = "-- Pilih Badal Tes --";
+
+      initHijriDateInputs();
+
+      await addSyncQueue('DAFTAR_TES', {
+        idPps, nama, jalsah: newRecord[4], tahap, juz, tglMulai, tglSelesai, idBadal, namaBadal, biaya: 10000, statusBayar
+      });
+
+      showMacToast("Berhasil Terdaftar", `Pendaftaran ${nama} (${tahap}) disimpan!`);
+      triggerSync();
+    }
+
+    function renderTableTes() {
+      const tbody = document.getElementById('tableTesBody');
+      tbody.innerHTML = '';
+
+      if (DB_TES.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-400 font-medium">Belum ada data pendaftaran tes.</td></tr>';
+        return;
+      }
+
+      DB_TES.forEach((row, idx) => {
+        const tr = document.createElement('tr');
+        const stBayarClass = row[12] === 'Lunas' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800';
+        
+        tr.innerHTML = `
+          <td class="p-3.5 font-semibold text-slate-700">${row[7] || row[0]}</td>
+          <td class="p-3.5"><span class="font-bold text-slate-800 block">${row[3]}</span><span class="text-[10px] text-slate-400 font-mono">${row[2]}</span></td>
+          <td class="p-3.5"><span class="font-bold text-slate-700 block">${row[5]}</span><span class="text-[10px] text-slate-400">${row[6]}</span></td>
+          <td class="p-3.5 text-slate-600">${row[10]}</td>
+          <td class="p-3.5"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${stBayarClass}">${row[12]}</span></td>
+          <td class="p-3.5 font-bold">${row[13]}</td>
+          <td class="p-3.5 text-center">
+            <div class="flex gap-1.5 justify-center items-center">
+              ${row[13] === 'Proses Tes' ? `
+                <button onclick="updateKeputusan(${idx}, 'Lulus')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold shadow-sm transition">Lulus</button>
+                <button onclick="updateKeputusan(${idx}, 'Tidak Lulus')" class="bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold shadow-sm transition">Tdk Lulus</button>
+              ` : `<span class="text-[10px] text-slate-400 font-bold uppercase mr-1">Selesai</span>`}
+              
+              <button onclick="hapusTes(${idx})" title="Hapus Data Tes Ini" class="w-7 h-7 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 flex items-center justify-center transition">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // --- HAPUS TES (DENGAN MAC CONFIRM & SYNC) ---
+    function hapusTes(idx) {
+      const row = DB_TES[idx];
+      if (!row) return;
+
+      const nama = row[3] || 'Santri';
+      const tahap = row[5] || 'Tes';
+
+      showMacConfirm("Hapus Data Tes?", `Pengetesan ${nama} (${tahap}) akan dihapus dari sistem dan Google Spreadsheet.`, async () => {
+        const removed = DB_TES.splice(idx, 1);
+        await setLocalCache('tes', DB_TES);
+        renderAllUI();
+
+        if (removed && removed[0]) {
+          await addSyncQueue('DELETE_TES_ROW', { rowData: removed[0], regId: removed[0][1] });
+        }
+
+        showMacToast("Data Tes Dihapus", `Data pendaftaran ${nama} berhasil dihapus!`);
+        triggerSync();
+      });
+    }
+
+    // --- UPDATE KEPUTUSAN (DENGAN PROTEKSI GANDA) ---
+    async function updateKeputusan(rowIdx, keputusan) {
+      const row = DB_TES[rowIdx];
+      if (!row) return;
+
+      if (row[13] !== 'Proses Tes') {
+        showMacToast("Keputusan Teraplikasi", "Keputusan tes ini sudah pernah diproses sebelumnya!", "error");
+        return;
+      }
+
+      const hToday = getTodayHijri();
+      const todayStr = `${hToday.day} ${hToday.monthName} ${hToday.year} H`;
+
+      row[13] = keputusan;
+
+      if (keputusan === 'Tidak Lulus') {
+        const isAlreadyRecorded = DB_KEUANGAN.some(k => 
+          String(k[3]).trim() === String(row[2]).trim() && 
+          String(k[6]).includes(row[5]) && 
+          String(k[2]).includes("Pengembalian")
+        );
+
+        if (!isAlreadyRecorded) {
+          if (row[12] === 'Lunas') {
+            row[11] = 5000;
+            DB_KEUANGAN.unshift([
+              todayStr, "Pengeluaran", "Pengembalian Tes (Tidak Lulus)", row[2], row[3], 5000, "Pengembalian 50% pendaftaran tes " + row[5]
+            ]);
+          } else {
+            row[11] = 5000;
+          }
+        }
+      }
+
+      await setLocalCache('tes', DB_TES);
+      await setLocalCache('keuangan', DB_KEUANGAN);
+      renderAllUI();
+
+      await addSyncQueue('UPDATE_KEPUTUSAN', {
+        rowIdx, idPps: row[2], nama: row[3], tahap: row[5], statusBayar: row[12], keputusan
+      });
+
+      showMacToast("Keputusan Disimpan", `Status ${row[3]}: ${keputusan}`);
+      triggerSync();
+    }
+
+    let currentTagihanItems = [];
+    function cariTagihanSantri() {
+      const pps = document.getElementById('searchTagihanPps').value.trim();
+      if(!pps) return;
+
+      const listBody = document.getElementById('listTagihanBody');
+      listBody.innerHTML = '';
+      currentTagihanItems = [];
+
+      const filtered = DB_TES.map((r, i) => ({ ...r, originalIdx: i })).filter(r => String(r[2]).trim() === pps && r[12] !== 'Lunas');
+
+      if (filtered.length === 0) {
+        showMacToast("Tidak Ada Tagihan", "Tidak ada tagihan tertunggak untuk ID PPS ini!");
+        document.getElementById('hasilTagihan').classList.add('hidden');
+        return;
+      }
+
+      document.getElementById('infoSantriTagihan').innerText = `${filtered[0][3]} (ID: ${pps})`;
+      let total = 0;
+
+      filtered.forEach(item => {
+        const biaya = Number(item[11]) || 10000;
+        total += biaya;
+        currentTagihanItems.push({
+          rowIdx: item.originalIdx,
+          idPps: item[2],
+          nama: item[3],
+          tahap: item[5],
+          nominal: biaya
+        });
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="p-3 font-bold">${item[5]}</td>
+          <td class="p-3 text-slate-500">${item[6]}</td>
+          <td class="p-3 font-mono font-bold text-slate-800">Rp ${biaya.toLocaleString()}</td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">${item[12]}</span></td>
+        `;
+        listBody.appendChild(tr);
+      });
+
+      document.getElementById('totalTagihanVal').innerText = "Rp " + total.toLocaleString();
+      document.getElementById('hasilTagihan').classList.remove('hidden');
+    }
+
+    async function prosesPelunasanTagihan() {
+      if (currentTagihanItems.length === 0) return;
+
+      const hToday = getTodayHijri();
+      const todayStr = `${hToday.day} ${hToday.monthName} ${hToday.year} H`;
+
+      currentTagihanItems.forEach(item => {
+        DB_TES[item.rowIdx][12] = 'Lunas';
+        DB_KEUANGAN.unshift([
+          todayStr, "Pemasukan", "Pelunasan Tagihan Tes", item.idPps, item.nama, item.nominal, "Pelunasan " + item.tahap
+        ]);
+      });
+
+      await setLocalCache('tes', DB_TES);
+      await setLocalCache('keuangan', DB_KEUANGAN);
+      renderAllUI();
+
+      document.getElementById('hasilTagihan').classList.add('hidden');
+
+      await addSyncQueue('BAYAR_TAGIHAN', { items: currentTagihanItems });
+      showMacToast("Pelunasan Berhasil", "Tagihan tes santri telah berhasil dilunasi!");
+      triggerSync();
+    }
+
+    function renderBadalDropdown() {
+      const container = document.getElementById('menuBadal');
+      container.innerHTML = '';
+
+      if (DB_BADAL.length === 0) {
+        container.innerHTML = '<div class="p-3 text-xs text-slate-400 text-center">Belum ada data badal</div>';
+        return;
+      }
+
+      DB_BADAL.forEach(row => {
+        const idPps = String(row[0]);
+        const nama = row[1];
+        
+        const count = DB_TES.filter(t => String(t[9]) === idPps).length;
+        const tesAktif = DB_TES.filter(t => String(t[9]) === idPps && t[13] === 'Proses Tes');
+        const isMenguji = tesAktif.length > 0;
+
+        const itemDiv = document.createElement('div');
+        itemDiv.onclick = () => selectBadalOption(idPps, nama);
+        itemDiv.className = "p-2.5 rounded-xl hover:bg-slate-100 cursor-pointer text-xs flex justify-between items-center transition border border-transparent hover:border-slate-200";
+
+        itemDiv.innerHTML = `
+          <div class="flex items-center gap-2.5">
+            <span class="w-2.5 h-2.5 rounded-full shrink-0 ${isMenguji ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}"></span>
+            <div>
+              <div class="font-bold text-slate-800">${nama}</div>
+              <div class="text-[10px] text-slate-400 font-medium">${isMenguji ? 'Menguji: ' + tesAktif[0][3] : 'Kosong (Siap Menguji)'}</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isMenguji ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
+              ${isMenguji ? 'Sedang Menguji' : 'Kosong'}
+            </span>
+            <span class="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">${count}x Tes</span>
+          </div>
+        `;
+        container.appendChild(itemDiv);
+      });
+    }
+
+    function renderBadalGrid() {
+      const container = document.getElementById('badalGrid');
+      container.innerHTML = '';
+
+      DB_BADAL.forEach(b => {
+        const idPps = String(b[0]);
+        const nama = b[1];
+
+        const tesAktif = DB_TES.filter(t => String(t[9]) === idPps && t[13] === 'Proses Tes');
+        const totalTes = DB_TES.filter(t => String(t[9]) === idPps).length;
+        const isMenguji = tesAktif.length > 0;
+
+        const card = document.createElement('div');
+        card.className = `p-4 rounded-2xl border transition-all ${isMenguji ? 'bg-amber-50/70 border-amber-200/80' : 'bg-slate-50/80 border-slate-200/80'}`;
+        card.innerHTML = `
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <h4 class="font-bold text-slate-800 text-xs">${nama}</h4>
+              <span class="text-[10px] font-mono text-slate-400">${idPps}</span>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase ${isMenguji ? 'bg-amber-200/80 text-amber-900' : 'bg-emerald-100 text-emerald-800'}">
+              ${isMenguji ? 'Sedang Menguji' : 'Kosong'}
+            </span>
+          </div>
+          <div class="text-xs text-slate-600 mt-2.5 pt-2 border-t border-slate-200/60 font-medium">
+            <div>Total Pernah Menguji: <b>${totalTes} kali</b></div>
+            ${isMenguji ? `<div class="text-amber-800 font-semibold mt-1">Menguji: ${tesAktif[0][3]} (${tesAktif[0][5]})</div>` : ''}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    async function submitKeuanganManual(e) {
+      e.preventDefault();
+      const hToday = getTodayHijri();
+      const todayStr = `${hToday.day} ${hToday.monthName} ${hToday.year} H`;
+
+      const jenis = document.getElementById('keuJenis').value;
+      const kategori = document.getElementById('keuKategori').value;
+      const nominal = Number(document.getElementById('keuNominal').value);
+      const keterangan = document.getElementById('keuKet').value;
+
+      DB_KEUANGAN.unshift([
+        todayStr, jenis, kategori, "-", "-", nominal, keterangan
+      ]);
+
+      await setLocalCache('keuangan', DB_KEUANGAN);
+      renderKeuangan();
+
+      e.target.reset();
+
+      await addSyncQueue('ADD_KEUANGAN', { jenis, kategori, nominal, keterangan });
+      showMacToast("Transaksi Disimpan", `Catatan ${jenis} Rp ${nominal.toLocaleString()} tersimpan`);
+      triggerSync();
+    }
+
+    // --- HAPUS BARIS KEUANGAN (DENGAN MAC CONFIRM & SYNC) ---
+    function hapusKeuangan(idx) {
+      showMacConfirm("Hapus Transaksi Keuangan?", "Data transaksi ini akan dihapus permanen dari sistem dan Google Spreadsheet.", async () => {
+        const removed = DB_KEUANGAN.splice(idx, 1);
+        await setLocalCache('keuangan', DB_KEUANGAN);
+        renderKeuangan();
+
+        if (removed && removed[0]) {
+          await addSyncQueue('DELETE_KEUANGAN_ROW', { rowData: removed[0] });
+        }
+
+        showMacToast("Transaksi Dihapus", "Catatan transaksi keuangan berhasil dihapus");
+        triggerSync();
+      });
+    }
+
+    function renderKeuangan() {
+      const tbody = document.getElementById('keuanganBody');
+      tbody.innerHTML = '';
+
+      let totalMasuk = 0;
+      let totalKeluar = 0;
+
+      if (DB_KEUANGAN.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-3 text-center text-slate-400">Belum ada data...</td></tr>';
+      }
+
+      DB_KEUANGAN.forEach((r, idx) => {
+        const jenis = r[1];
+        const nominal = Number(r[5]) || 0;
+
+        if (jenis === 'Pemasukan') totalMasuk += nominal;
+        if (jenis === 'Pengeluaran') totalKeluar += nominal;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="p-3 text-slate-600 font-medium">${r[0]}</td>
+          <td class="p-3"><span class="font-bold ${jenis === 'Pemasukan' ? 'text-emerald-600' : 'text-rose-600'}">${jenis}</span></td>
+          <td class="p-3">${r[2]}</td>
+          <td class="p-3 font-mono font-bold text-slate-800">Rp ${nominal.toLocaleString()}</td>
+          <td class="p-3 text-slate-500">${r[6] || '-'}</td>
+          <td class="p-3 text-center">
+            <button onclick="hapusKeuangan(${idx})" title="Hapus Baris Ini" class="w-7 h-7 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 flex items-center justify-center transition mx-auto">
+              <i class="fa-solid fa-trash-can text-xs"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('statPemasukan').innerText = "Rp " + totalMasuk.toLocaleString();
+      document.getElementById('statPengeluaran').innerText = "Rp " + totalKeluar.toLocaleString();
+      document.getElementById('statSaldo').innerText = "Rp " + (totalMasuk - totalKeluar).toLocaleString();
+    }
+  </script>
+</body>
+</html>

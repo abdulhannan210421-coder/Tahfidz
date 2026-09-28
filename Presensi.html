@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Laporan Bulanan & Presensi Tahfidz - Sidogiri</title>
+  <!-- Tailwind CSS & FontAwesome -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { margin: 0; padding: 0; background-color: #0f172a; color: #f8fafc; font-size: 12px; overflow-x: hidden; }
+
+    /* GLASS TILE MAC DOCK */
+    .glass-tile {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .dock-tile {
+      transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+      will-change: transform;
+    }
+
+    /* NAVBAR UTAMA WEB */
+    .navbar {
+      background-color: #1e293b; color: #ffffff; padding: 10px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* BADGE SYNC */
+    .status-badge {
+      padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 11px;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .status-badge.synced { background-color: #065f46; color: #34d399; border: 1px solid #059669; }
+    .status-badge.pending { background-color: #78350f; color: #fbbf24; border: 1px solid #d97706; }
+
+    /* TOMBOL */
+    .btn {
+      padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer;
+      font-weight: 600; font-size: 11px; display: inline-flex; align-items: center; gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-primary { background-color: #2563eb; color: #ffffff; }
+    .btn-primary:hover { background-color: #1d4ed8; }
+    .btn-success { background-color: #059669; color: #ffffff; }
+    .btn-success:hover { background-color: #047857; }
+    .btn-secondary { background-color: #475569; color: #ffffff; }
+
+    /* TABEL WEB INPUT */
+    .table-container {
+      background: #ffffff; color: #0f172a; border-radius: 12px; border: 1px solid #cbd5e1;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow-x: auto; padding: 12px; margin: 15px 20px;
+    }
+    table.presensi-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: center; }
+    table.presensi-table th, table.presensi-table td { border: 1px solid #cbd5e1; padding: 4px 2px; }
+    table.presensi-table th { background-color: #047857; color: #ffffff; font-weight: 700; font-size: 11px; }
+    .cell-gray-bg { background-color: #f1f5f9 !important; }
+    .v-text { writing-mode: vertical-lr; transform: rotate(180deg); padding: 4px 2px !important; font-size: 10px; }
+
+    /* INPUT GRID KONTRAS */
+    .grid-input {
+      width: 100%; min-width: 28px; height: 28px; text-align: center;
+      border: 1px solid #cbd5e1; background: #ffffff; font-size: 12px; font-weight: 800;
+      text-transform: uppercase; border-radius: 4px; color: #0f172a;
+    }
+    .grid-input:focus {
+      outline: none; border-color: #2563eb; background-color: #eff6ff !important;
+      box-shadow: 0 0 0 2px #93c5fd;
+    }
+    .input-sakit { background-color: #2563eb !important; color: #ffffff !important; font-weight: 900; }
+    .input-izin  { background-color: #d97706 !important; color: #ffffff !important; font-weight: 900; }
+    .input-alpa  { background-color: #dc2626 !important; color: #ffffff !important; font-weight: 900; }
+
+    #print-area { display: none; }
+
+    /* ==========================================================
+       ATURAN CETAK PRESISI (A4 LANDSCAPE - MENGHILANGKAN HALAMAN KOSONG)
+       ========================================================== */
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 4mm;
+      }
+
+      html, body {
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        overflow: hidden !important;
+      }
+
+      body * { visibility: hidden !important; }
+      #print-area, #print-area * { visibility: visible !important; }
+
+      #print-area {
+        display: block !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+      }
+
+      .print-sheet {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-height: 198mm !important;
+        border: 1.5px solid #000000 !important;
+        padding: 6px 8px !important;
+        margin: 0 !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-family: Arial, sans-serif !important;
+        
+        page-break-after: always !important;
+        break-after: page !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+
+        display: block !important;
+        overflow: hidden !important;
+      }
+
+      .print-sheet:last-child {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+        page-break-before: auto !important;
+      }
+
+      .p-header { text-align: center !important; margin-bottom: 2px !important; line-height: 1.1 !important; }
+      .p-header h2 { margin: 0 !important; font-size: 13px !important; font-weight: bold !important; letter-spacing: 0.5px !important; }
+      .p-header h3 { margin: 1px 0 !important; font-size: 11px !important; font-weight: bold !important; }
+      .p-header h4 { margin: 1px 0 !important; font-size: 9px !important; font-weight: normal !important; }
+
+      .p-meta {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: flex-end !important;
+        font-weight: bold !important;
+        font-size: 9px !important;
+        margin-bottom: 3px !important;
+      }
+
+      table.p-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 7.5px !important;
+        text-align: center !important;
+        table-layout: fixed !important;
+        margin-bottom: 4px !important;
+      }
+      table.p-table th, table.p-table td {
+        border: 1px solid #000000 !important;
+        padding: 0px 0px !important;
+        height: 15px !important;
+        line-height: 15px !important;
+        overflow: hidden !important;
+        white-space: nowrap !important;
+      }
+      table.p-table th {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        font-weight: bold !important;
+        font-size: 7px !important;
+        height: 13px !important;
+        line-height: 1.1 !important;
+      }
+      table.p-table td.bg-gray, table.p-table th.bg-gray {
+        background-color: #e5e7eb !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .th-tsilang {
+        writing-mode: vertical-lr !important;
+        transform: rotate(180deg) !important;
+        text-align: center !important;
+        white-space: nowrap !important;
+        padding: 2px 0 !important;
+        font-size: 7px !important;
+      }
+
+      table.p-table td.col-nama {
+        text-align: left !important;
+        padding-left: 4px !important;
+        padding-right: 2px !important;
+        font-weight: normal !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        font-size: 8px !important;
+      }
+
+      .p-footer {
+        display: flex !important;
+        justify-content: space-between !important;
+        font-size: 7.5px !important;
+        line-height: 1.15 !important;
+        border-top: 1px solid #000000 !important;
+        padding-top: 3px !important;
+      }
+      .p-footer-left { width: 28% !important; }
+      .p-footer-right { width: 71% !important; }
+      .p-footer-right ol { margin: 0 !important; padding-left: 12px !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR UTAMA -->
+  <div class="navbar">
+    <div class="flex items-center gap-3">
+      <div class="bg-emerald-600 text-white font-black px-2.5 py-1 rounded-lg text-sm">TP</div>
+      <div>
+        <div class="font-bold text-sm">PRESENSI TAKROR YAUMIYAH TAHFIDZ</div>
+        <div class="text-[10px] text-slate-400">Pondok Pesantren Sidogiri - High Speed Engine</div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <span id="sync-status" class="status-badge synced">
+        <span id="sync-text">Lokal (0 Pending)</span>
+      </span>
+      <button class="btn btn-success" onclick="ModuleSync.forceSync()">🔄 Sync Ke Spreadsheet</button>
+      <button class="btn btn-primary" onclick="ModulePresensi.printCurrentJalsah()">🖨️ Cetak Jalsah Ini</button>
+      <button class="btn btn-secondary" onclick="ModulePresensi.printAllJalsah()">🖨️ Cetak Semua</button>
+    </div>
+  </div>
+
+  <!-- MACOS SPLIT DOCK (NAVIGASI KIRI & KANAN) -->
+  <div id="macos-dock-left-wrapper" class="fixed left-3 top-1/2 -translate-y-1/2 z-[9990] transition-all duration-300 -translate-x-[120%] opacity-0 pointer-events-none">
+    <div id="macos-dock-left" class="bg-slate-900/80 border border-white/10 p-2 rounded-3xl backdrop-blur-xl flex flex-col gap-2 shadow-2xl"></div>
+  </div>
+
+  <div id="macos-dock-right-wrapper" class="fixed right-3 top-1/2 -translate-y-1/2 z-[9990] transition-all duration-300 translate-x-[120%] opacity-0 pointer-events-none">
+    <div id="macos-dock-right" class="bg-slate-900/80 border border-white/10 p-2 rounded-3xl backdrop-blur-xl flex flex-col gap-2 shadow-2xl"></div>
+  </div>
+
+  <!-- DASHBOARD STATISTIK & FILTER -->
+  <div class="p-5 max-w-[1600px] mx-auto">
+    
+    <!-- HEADER BAR & BADGE ACTIVE JALSAH -->
+    <div class="flex flex-wrap items-center justify-between bg-slate-800/90 border border-slate-700/80 p-4 rounded-xl mb-4 gap-4">
+      <div class="flex items-center gap-3">
+        <span class="text-xs font-bold text-slate-400 uppercase">JALSAH AKTIF:</span>
+        <span id="active-jalsah-text" class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-black px-4 py-1.5 rounded-full text-xs shadow-lg shadow-emerald-500/20">
+          SEMUA JALSAH
+        </span>
+        <span class="text-xs text-slate-400 italic">(Arahkan kursor ke pinggir kiri/kanan layar untuk membuka Dock Navigasi Jalsah)</span>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
+          <label class="text-xs font-semibold text-slate-300">Pencarian:</label>
+          <input type="text" id="search-santri" placeholder="Nama / ID PPS / Domisili..." oninput="ModulePresensi.filterSearch()" class="bg-slate-900 text-white border border-slate-700 rounded-lg px-3 py-1 text-xs focus:outline-none focus:border-emerald-500 w-48">
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-xs font-semibold text-slate-300">Tahun Ajaran:</label>
+          <input type="text" id="presensi-tahun-ajaran" value="1447-1448 H" class="bg-slate-900 text-white border border-slate-700 rounded-lg px-2 py-1 text-xs w-24 text-center" onchange="ModulePresensi.renderTable()">
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-xs font-semibold text-slate-300">Offset Hijriah:</label>
+          <input type="number" id="hijri-offset" value="0" class="bg-slate-900 text-white border border-slate-700 rounded-lg px-2 py-1 text-xs w-12 text-center" onchange="ModulePresensi.renderTable()">
+        </div>
+      </div>
+    </div>
+
+    <!-- RINGKASAN REKAP ABSENSI PEKAN INI -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+      <div class="bg-slate-800/80 border border-slate-700 p-3 rounded-xl flex flex-col justify-between">
+        <span class="text-[10px] font-bold text-slate-400 uppercase">Hafalan Baru (H)</span>
+        <div class="flex gap-2 text-xs font-bold mt-1">
+          <span class="text-blue-400" id="stat-h-s">S: 0</span>
+          <span class="text-amber-400" id="stat-h-i">I: 0</span>
+          <span class="text-rose-400" id="stat-h-a">A: 0</span>
+        </div>
+      </div>
+      <div class="bg-slate-800/80 border border-slate-700 p-3 rounded-xl flex flex-col justify-between">
+        <span class="text-[10px] font-bold text-slate-400 uppercase">Takror (T)</span>
+        <div class="flex gap-2 text-xs font-bold mt-1">
+          <span class="text-blue-400" id="stat-t-s">S: 0</span>
+          <span class="text-amber-400" id="stat-t-i">I: 0</span>
+          <span class="text-rose-400" id="stat-t-a">A: 0</span>
+        </div>
+      </div>
+      <div class="bg-slate-800/80 border border-slate-700 p-3 rounded-xl flex flex-col justify-between">
+        <span class="text-[10px] font-bold text-slate-400 uppercase">Hadiran Malam (M)</span>
+        <div class="flex gap-2 text-xs font-bold mt-1">
+          <span class="text-blue-400" id="stat-m-s">S: 0</span>
+          <span class="text-amber-400" id="stat-m-i">I: 0</span>
+          <span class="text-rose-400" id="stat-m-a">A: 0</span>
+        </div>
+      </div>
+      <div class="bg-slate-800/80 border border-slate-700 p-3 rounded-xl flex flex-col justify-between">
+        <span class="text-[10px] font-bold text-slate-400 uppercase">Hadiran Pagi (P)</span>
+        <div class="flex gap-2 text-xs font-bold mt-1">
+          <span class="text-blue-400" id="stat-p-s">S: 0</span>
+          <span class="text-amber-400" id="stat-p-i">I: 0</span>
+          <span class="text-rose-400" id="stat-p-a">A: 0</span>
+        </div>
+      </div>
+      <div class="bg-slate-800/80 border border-slate-700 p-3 rounded-xl flex flex-col justify-between col-span-2 md:col-span-1">
+        <span class="text-[10px] font-bold text-slate-400 uppercase">T. Silang</span>
+        <div class="flex gap-2 text-xs font-bold mt-1">
+          <span class="text-blue-400" id="stat-ts-s">S: 0</span>
+          <span class="text-amber-400" id="stat-ts-i">I: 0</span>
+          <span class="text-rose-400" id="stat-ts-a">A: 0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABEL INPUT PRESENSI WEB -->
+    <div class="table-container">
+      <div class="flex justify-between font-bold text-sm mb-3 px-1">
+        <span>BULAN : <span id="presensi-bulan-txt" class="text-emerald-700">R. TSANI</span></span>
+        <span id="presensi-kode-jalsah" class="text-emerald-800">JALSAH: ALL</span>
+        <span id="presensi-ust-pembina" class="text-emerald-800">UST. PEMBINA</span>
+      </div>
+
+      <table class="presensi-table" id="main-presensi-table">
+        <tbody>
+          <tr><td colspan="30" class="p-5 text-center">Memuat data presensi...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <div id="print-area"></div>
+
+  <!-- iOS MODERN GLASS DIALOG POPUP CONTAINER -->
+  <div id="ios-alert-backdrop" class="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-[99999] hidden items-center justify-center p-4 transition-all duration-200 opacity-0 pointer-events-none">
+    <div id="ios-alert-card" class="bg-slate-900/90 border border-white/20 text-white w-full max-w-xs rounded-3xl p-5 shadow-2xl backdrop-blur-2xl text-center transform scale-90 transition-all duration-200">
+      <div id="ios-alert-icon" class="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center text-xl"></div>
+      <h3 id="ios-alert-title" class="text-base font-bold mb-1 tracking-tight">Informasi</h3>
+      <p id="ios-alert-message" class="text-xs text-slate-300 mb-5 leading-relaxed font-normal"></p>
+      <button id="ios-alert-btn" onclick="closeIosAlert()" class="w-full py-2.5 font-bold rounded-2xl text-xs transition-all active:scale-95">
+        Oke
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // URL WEB APP APPS SCRIPT ANDA
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxUxHHN179eb5XfsyX3YIg3ljfDbXlnoM6xLKgt2ml4CTxntoRUcxg3_vtiBqgcwVy/exec";
+
+    let activeJalsah = 'ALL';
+    let rawHeaders = [];
+    let dbRows = [];
+    let iosAlertCallback = null;
+
+    /* ==========================================================
+       0. iOS DIALOG POPUP SYSTEM (MODERN GLASS)
+       ========================================================== */
+    function showIosAlert(message, title = 'Pemberitahuan', type = 'info', onOk = null) {
+      const backdrop = document.getElementById('ios-alert-backdrop');
+      const card = document.getElementById('ios-alert-card');
+      const titleEl = document.getElementById('ios-alert-title');
+      const msgEl = document.getElementById('ios-alert-message');
+      const iconEl = document.getElementById('ios-alert-icon');
+      const btnEl = document.getElementById('ios-alert-btn');
+
+      titleEl.innerText = title;
+      msgEl.innerText = message;
+      iosAlertCallback = onOk;
+
+      if (type === 'success') {
+        iconEl.className = 'w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center text-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.3)]';
+        iconEl.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+        btnEl.className = 'w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold rounded-2xl text-xs transition-all active:scale-95 shadow-lg shadow-emerald-600/30';
+      } else if (type === 'error') {
+        iconEl.className = 'w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center text-xl bg-rose-500/20 text-rose-400 border border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.3)]';
+        iconEl.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+        btnEl.className = 'w-full py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-2xl text-xs transition-all active:scale-95 shadow-lg shadow-rose-600/30';
+      } else if (type === 'warning') {
+        iconEl.className = 'w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center text-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.3)]';
+        iconEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+        btnEl.className = 'w-full py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-2xl text-xs transition-all active:scale-95 shadow-lg shadow-amber-600/30';
+      } else {
+        iconEl.className = 'w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center text-xl bg-blue-500/20 text-blue-400 border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.3)]';
+        iconEl.innerHTML = '<i class="fa-solid fa-circle-info"></i>';
+        btnEl.className = 'w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl text-xs transition-all active:scale-95 shadow-lg shadow-blue-600/30';
+      }
+
+      backdrop.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+      backdrop.classList.add('flex', 'opacity-100', 'pointer-events-auto');
+
+      setTimeout(() => {
+        card.classList.remove('scale-90');
+        card.classList.add('scale-100');
+      }, 10);
+    }
+
+    function closeIosAlert() {
+      const backdrop = document.getElementById('ios-alert-backdrop');
+      const card = document.getElementById('ios-alert-card');
+
+      card.classList.remove('scale-100');
+      card.classList.add('scale-90');
+      backdrop.classList.remove('opacity-100', 'pointer-events-auto');
+      backdrop.classList.add('opacity-0', 'pointer-events-none');
+
+      setTimeout(() => {
+        backdrop.classList.remove('flex');
+        backdrop.classList.add('hidden');
+        if (typeof iosAlertCallback === 'function') {
+          const cb = iosAlertCallback;
+          iosAlertCallback = null;
+          cb();
+        }
+      }, 150);
+    }
+
+    /* ==========================================================
+       1. STORAGE LOCAL INDEXEDDB & ENGINE RAM
+       ========================================================== */
+    const LocalDB = {
+      db: null,
+      pendingMap: new Map(),
+
+      async init() {
+        return new Promise((resolve) => {
+          const req = indexedDB.open('TahfidzPresensiDB', 1);
+          req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('pending_sync')) {
+              db.createObjectStore('pending_sync', { keyPath: 'key' });
+            }
+          };
+          req.onsuccess = async (e) => {
+            this.db = e.target.result;
+            await this.loadAllToMemory();
+            resolve();
+          };
+        });
+      },
+
+      async loadAllToMemory() {
+        return new Promise((resolve) => {
+          if (!this.db) return resolve();
+          const tx = this.db.transaction('pending_sync', 'readonly');
+          const store = tx.objectStore('pending_sync');
+          const req = store.getAll();
+          req.onsuccess = () => {
+            const items = req.result || [];
+            items.forEach(item => {
+              this.pendingMap.set(item.key, item);
+              if (item.idPps && item.data && item.data.rawRec) {
+                ModulePresensi.attendanceStore[item.idPps] = item.data.rawRec;
+              }
+            });
+            this.updatePendingCountUI();
+            resolve();
+          };
+        });
+      },
+
+      savePending(idPps, itemData, rawRec) {
+        const key = `${idPps}_${itemData.bulan}`;
+        const recordObj = { key: key, idPps: idPps, data: { ...itemData, rawRec: rawRec }, timestamp: Date.now() };
+        this.pendingMap.set(key, recordObj);
+        this.updatePendingCountUI();
+
+        if (this.db) {
+          const tx = this.db.transaction('pending_sync', 'readwrite');
+          tx.objectStore('pending_sync').put(recordObj);
+        }
+      },
+
+      async removeKeys(keys) {
+        keys.forEach(k => this.pendingMap.delete(k));
+        this.updatePendingCountUI();
+
+        if (this.db && keys.length) {
+          const tx = this.db.transaction('pending_sync', 'readwrite');
+          const store = tx.objectStore('pending_sync');
+          keys.forEach(k => store.delete(k));
+        }
+      },
+
+      updatePendingCountUI() {
+        const count = this.pendingMap.size;
+        const badge = document.getElementById('sync-status');
+        const txt = document.getElementById('sync-text');
+        
+        if (count > 0) {
+          badge.className = 'status-badge pending';
+          txt.innerText = `Lokal (${count} Pending)`;
+        } else {
+          badge.className = 'status-badge synced';
+          txt.innerText = `Lokal (0 Pending)`;
+        }
+      }
+    };
+
+    /* ==========================================================
+       2. LOAD DATA & PERSISTENSI REKAP SPREADSHEET
+       ========================================================== */
+    window.TTQ = {
+      state: { santri: [], jalsahList: [], pembinaMap: {} },
+
+      async init() {
+        await LocalDB.init();
+        this.loadData();
+        ModuleSync.startAutoSyncWorker();
+      },
+
+      loadData() {
+        if (!SCRIPT_URL || SCRIPT_URL.includes("GANTI_DENGAN")) {
+          showIosAlert("Harap atur SCRIPT_URL milik Anda!", "Peringatan System", "warning");
+          return;
+        }
+
+        fetch(`${SCRIPT_URL}?action=getData`)
+          .then(res => res.json())
+          .then(res => {
+            if (res.success) {
+              rawHeaders = res.headers || [];
+              dbRows = res.rows || [];
+              this.parseSpreadsheetData(res.headers, res.rows, res.pembinaMap || {});
+              if (res.rekapMap) this.parseRekapMap(res.rekapMap);
+              renderJalsahGrid();
+              ModulePresensi.init();
+            } else {
+              showIosAlert('Gagal memuat data: ' + res.error, 'Kesalahan Data', 'error');
+            }
+          })
+          .catch(err => {
+            console.error(err);
+            showIosAlert('Gagal tersambung ke Google Apps Script.', 'Koneksi Terputus', 'error');
+          });
+      },
+
+      parseSpreadsheetData(headers, rows, pembinaMap) {
+        this.state.pembinaMap = pembinaMap;
+        
+        const colIdx = {
+          idPps: headers.indexOf('ID PPS'),
+          nama: headers.indexOf('NAMA'),
+          dom: headers.indexOf('DOMISILI'),
+          kelas: headers.indexOf('KELAS'),
+          tingkat: headers.indexOf('TINGKAT'),
+          jalsah: headers.indexOf('JALSAH'),
+          tahunMasuk: headers.indexOf('TAHUN MASUK'),
+          targetHatam: headers.indexOf('Target Hatam')
+        };
+
+        const santriList = [];
+        const jalsahSet = new Set();
+
+        rows.forEach(row => {
+          const jRaw = row[colIdx.jalsah];
+          if (jRaw === null || jRaw === undefined || String(jRaw).trim() === '') return;
+          
+          const jVal = String(jRaw).trim();
+          jalsahSet.add(jVal);
+
+          santriList.push({
+            idPps: String(row[colIdx.idPps] || '').trim(),
+            nama: String(row[colIdx.nama] || '').trim(),
+            dom: String(row[colIdx.dom] || '').trim(),
+            kelas: String(row[colIdx.kelas] || '').trim(),
+            tingkat: String(row[colIdx.tingkat] || '').trim(),
+            jalsah: jVal,
+            tahunMasuk: String(row[colIdx.tahunMasuk] || '1445').trim(),
+            targetHatam: String(row[colIdx.targetHatam] || '3 Tahun').trim()
+          });
+        });
+
+        this.state.santri = santriList;
+        this.state.jalsahList = Array.from(jalsahSet).sort((a,b) => a.localeCompare(b, undefined, {numeric: true}));
+      },
+
+      parseRekapMap(rekapMap) {
+        const days = ModulePresensi.getDynamicDates();
+
+        Object.keys(rekapMap).forEach(type => {
+          const sheetObj = rekapMap[type];
+          if (!sheetObj || !sheetObj.rows) return;
+
+          sheetObj.rows.forEach(r => {
+            const idPps = String(r[1] || '').trim();
+            if (!idPps) return;
+
+            if (!ModulePresensi.attendanceStore[idPps]) {
+              ModulePresensi.attendanceStore[idPps] = {};
+            }
+            const rec = ModulePresensi.attendanceStore[idPps];
+
+            const tglSakitStr = String(r[7] || '');
+            const tglIzinStr = String(r[8] || '');
+            const tglAlpaStr = String(r[9] || '');
+            const ketStr = String(r[10] || '');
+
+            if (ketStr && ketStr !== '-') rec.ket = ketStr;
+
+            const tglSakitList = tglSakitStr.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+            const tglIzinList = tglIzinStr.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+            const tglAlpaList = tglAlpaStr.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+
+            days.forEach((d, dIdx) => {
+              if (d.isTSilang && type === 'T.Silang') {
+                if (tglSakitList.includes(d.tgl)) rec[`d${dIdx}_ts`] = 'S';
+                if (tglIzinList.includes(d.tgl)) rec[`d${dIdx}_ts`] = 'I';
+                if (tglAlpaList.includes(d.tgl)) rec[`d${dIdx}_ts`] = 'A';
+              } else if (!d.isTSilang) {
+                const subKey = type.toLowerCase();
+                if (tglSakitList.includes(d.tgl)) rec[`d${dIdx}_${subKey}`] = 'S';
+                if (tglIzinList.includes(d.tgl)) rec[`d${dIdx}_${subKey}`] = 'I';
+                if (tglAlpaList.includes(d.tgl)) rec[`d${dIdx}_${subKey}`] = 'A';
+              }
+            });
+          });
+        });
+      }
+    };
+
+    /* ==========================================================
+       3. MACOS SPLIT DOCK NAVIGATION ENGINE
+       ========================================================== */
+    function renderJalsahGrid() {
+      const jalsahIdx = rawHeaders.indexOf("JALSAH") !== -1 ? rawHeaders.indexOf("JALSAH") : 5;
+      let jalsahSet = new Set();
+      
+      dbRows.forEach(row => { 
+        const val = row[jalsahIdx];
+        if (val !== undefined && val !== null && String(val).trim() !== "") {
+          jalsahSet.add(String(val).trim()); 
+        }
+      });
+
+      let sortedJalsah = Array.from(jalsahSet).sort((a, b) => {
+        return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+      });
+
+      const allItems = ['ALL', ...sortedJalsah];
+      const half = Math.ceil(allItems.length / 2);
+      const leftList = allItems.slice(0, half);
+      const rightList = allItems.slice(half);
+
+      const dockLeft = document.getElementById('macos-dock-left');
+      const dockRight = document.getElementById('macos-dock-right');
+
+      let htmlLeft = '';
+      leftList.forEach(j => {
+        const isAll = j === 'ALL';
+        const count = isAll ? dbRows.length : dbRows.filter(r => String(r[jalsahIdx]).trim() === j).length;
+        const isActive = activeJalsah === j;
+        const labelName = isAll ? 'ALL' : ((j === '0' || j === 0) ? '0' : j);
+        const fullLabel = isAll ? 'Semua Jalsah' : ((j === '0' || j === 0) ? 'JALSAH 0' : `JALSAH ${j}`);
+
+        htmlLeft += `
+          <div class="dock-tile relative group flex items-center justify-center cursor-pointer" data-jalsah="${j}">
+            <button onclick="selectJalsah('${j}')" 
+              class="w-10 h-10 rounded-2xl flex flex-col items-center justify-center font-black text-[10.5px] leading-none transition-all duration-200 border glass-tile relative
+              ${isActive ? 'bg-gradient-to-tr from-emerald-600 to-teal-500 text-white border-emerald-300 ring-2 ring-emerald-400/60 shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-slate-800/80 text-slate-300 border-white/10 hover:bg-slate-700/90 hover:text-white'}">
+              ${isAll ? '<i class="fa-solid fa-list-check text-[11px] mb-0.5"></i>' : ''}
+              <span>${labelName}</span>
+              ${isActive ? '<span class="absolute -right-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>' : ''}
+            </button>
+            <div class="absolute left-14 top-1/2 -translate-y-1/2 bg-slate-900/95 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl shadow-2xl border border-white/20 opacity-0 group-hover:opacity-100 transition-all duration-150 pointer-events-none whitespace-nowrap z-[9999]">
+              ${fullLabel} <span class="text-emerald-400 ml-1">(${count} Santri)</span>
+            </div>
+          </div>
+        `;
+      });
+
+      let htmlRight = '';
+      rightList.forEach(j => {
+        const count = dbRows.filter(r => String(r[jalsahIdx]).trim() === j).length;
+        const isActive = activeJalsah === j;
+        const labelName = (j === '0' || j === 0) ? '0' : j;
+        const fullLabel = (j === '0' || j === 0) ? 'JALSAH 0' : `JALSAH ${j}`;
+
+        htmlRight += `
+          <div class="dock-tile relative group flex items-center justify-center cursor-pointer" data-jalsah="${j}">
+            <button onclick="selectJalsah('${j}')" 
+              class="w-10 h-10 rounded-2xl flex flex-col items-center justify-center font-black text-[10.5px] leading-none transition-all duration-200 border glass-tile relative
+              ${isActive ? 'bg-gradient-to-tr from-emerald-600 to-teal-500 text-white border-emerald-300 ring-2 ring-emerald-400/60 shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-slate-800/80 text-slate-300 border-white/10 hover:bg-slate-700/90 hover:text-white'}">
+              <span>${labelName}</span>
+              ${isActive ? '<span class="absolute -left-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>' : ''}
+            </button>
+            <div class="absolute right-14 top-1/2 -translate-y-1/2 bg-slate-900/95 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl shadow-2xl border border-white/20 opacity-0 group-hover:opacity-100 transition-all duration-150 pointer-events-none whitespace-nowrap z-[9999]">
+              ${fullLabel} <span class="text-emerald-400 ml-1">(${count} Santri)</span>
+            </div>
+          </div>
+        `;
+      });
+
+      dockLeft.innerHTML = htmlLeft;
+      dockRight.innerHTML = htmlRight;
+
+      setupMacDockSplitAutoHideAnd3DPhysics();
+    }
+
+    let isLeftOpen = false;
+    let isRightOpen = false;
+    let rAFPending = false;
+
+    function setupMacDockSplitAutoHideAnd3DPhysics() {
+      const leftWrapper = document.getElementById('macos-dock-left-wrapper');
+      const rightWrapper = document.getElementById('macos-dock-right-wrapper');
+      const dockLeft = document.getElementById('macos-dock-left');
+      const dockRight = document.getElementById('macos-dock-right');
+
+      if (!leftWrapper || !rightWrapper) return;
+
+      function updateDocks(x, y) {
+        const screenWidth = window.innerWidth;
+
+        if (x <= 25 && !isLeftOpen) {
+          isLeftOpen = true;
+          leftWrapper.classList.remove('-translate-x-[120%]', 'opacity-0', 'pointer-events-none');
+          leftWrapper.classList.add('translate-x-0', 'opacity-100', 'pointer-events-auto');
+        } else if (isLeftOpen) {
+          const rect = leftWrapper.getBoundingClientRect();
+          if (x > rect.right + 45 || y < rect.top - 40 || y > rect.bottom + 40) {
+            isLeftOpen = false;
+            leftWrapper.classList.add('-translate-x-[120%]', 'opacity-0', 'pointer-events-none');
+            leftWrapper.classList.remove('translate-x-0', 'opacity-100', 'pointer-events-auto');
+          }
+        }
+
+        if (x >= screenWidth - 25 && !isRightOpen) {
+          isRightOpen = true;
+          rightWrapper.classList.remove('translate-x-[120%]', 'opacity-0', 'pointer-events-none');
+          rightWrapper.classList.add('translate-x-0', 'opacity-100', 'pointer-events-auto');
+        } else if (isRightOpen) {
+          const rect = rightWrapper.getBoundingClientRect();
+          if (x < rect.left - 45 || y < rect.top - 40 || y > rect.bottom + 40) {
+            isRightOpen = false;
+            rightWrapper.classList.add('translate-x-[120%]', 'opacity-0', 'pointer-events-none');
+            rightWrapper.classList.remove('translate-x-0', 'opacity-100', 'pointer-events-auto');
+          }
+        }
+
+        if (isLeftOpen) apply3DMagnification(dockLeft, y, 'left');
+        if (isRightOpen) apply3DMagnification(dockRight, y, 'right');
+      }
+
+      function apply3DMagnification(dockEl, mouseY, side) {
+        const tiles = dockEl.querySelectorAll('.dock-tile');
+        const maxDistance = 90;
+        const maxScale = 0.42;
+
+        tiles.forEach(tile => {
+          const rect = tile.getBoundingClientRect();
+          const centerY = rect.top + rect.height / 2;
+          const distance = Math.abs(mouseY - centerY);
+
+          if (distance < maxDistance) {
+            const factor = Math.cos((distance / maxDistance) * (Math.PI / 2));
+            const scale = 1 + (maxScale * Math.pow(factor, 2));
+            const shiftX = side === 'left' ? (scale - 1) * 16 : (1 - scale) * 16;
+            tile.style.transform = `scale(${scale}) translateX(${shiftX}px) translateZ(20px)`;
+            tile.style.zIndex = Math.round(scale * 40);
+          } else {
+            tile.style.transform = 'scale(1) translateX(0px) translateZ(0px)';
+            tile.style.zIndex = '1';
+          }
+        });
+      }
+
+      window.addEventListener('mousemove', (e) => {
+        if (!rAFPending) {
+          requestAnimationFrame(() => {
+            updateDocks(e.clientX, e.clientY);
+            rAFPending = false;
+          });
+          rAFPending = true;
+        }
+      });
+    }
+
+    function selectJalsah(jalsah) {
+      activeJalsah = jalsah;
+      renderJalsahGrid();
+      ModulePresensi.renderTable();
+
+      const activeBadgeText = document.getElementById('active-jalsah-text');
+      if (activeBadgeText) {
+        activeBadgeText.innerText = jalsah === 'ALL' ? 'SEMUA JALSAH' : (jalsah === '0' ? 'JALSAH 0' : `JALSAH ${jalsah}`);
+      }
+    }
+
+    /* ==========================================================
+       4. MODUL PRESENSI & MESIN CETAK PRESISI A4 LANDSCAPE
+       ========================================================== */
+    window.ModulePresensi = {
+      attendanceStore: {},
+
+      init() {
+        this.renderTable();
+      },
+
+      getDynamicDates() {
+        const offset = parseInt(document.getElementById('hijri-offset')?.value || 0);
+        const now = new Date();
+        now.setDate(now.getDate() + offset);
+
+        function getHijriDetails(dateObj) {
+          const formatterDay = new Intl.DateTimeFormat('id-ID-u-ca-islamic-umalqura', { day: 'numeric' });
+          const formatterMonth = new Intl.DateTimeFormat('id-ID-u-ca-islamic-umalqura', { month: 'long' });
+          const daysOfWeek = ["AHAD", "SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU"];
+          return {
+            hijriDay: parseInt(formatterDay.format(dateObj)),
+            dayName: daysOfWeek[dateObj.getDay()],
+            monthName: formatterMonth.format(dateObj).toUpperCase()
+          };
+        }
+
+        const days = [];
+        let curr = new Date(now);
+
+        for (let i = 0; i < 7; i++) {
+          const details = getHijriDetails(curr);
+          days.push({
+            index: i,
+            tgl: details.hijriDay,
+            hari: details.dayName,
+            bulan: details.monthName,
+            isTSilang: (details.dayName === "SELASA" || details.dayName === "JUMAT")
+          });
+          curr.setDate(curr.getDate() + 1);
+        }
+        return days;
+      },
+
+      filterSearch() {
+        this.renderTable();
+      },
+
+      renderTable() {
+        const jalsah = activeJalsah;
+        const searchKeyword = (document.getElementById('search-santri')?.value || '').toLowerCase();
+        
+        const table = document.getElementById('main-presensi-table');
+        if (!table) return;
+
+        const namaPembina = jalsah === 'ALL' 
+          ? "SEMUA PEMBINA" 
+          : (TTQ.state.pembinaMap[jalsah] || TTQ.state.pembinaMap[`T${jalsah}`] || `UST. PEMBINA JALSAH ${jalsah}`);
+
+        document.getElementById('presensi-ust-pembina').innerText = namaPembina.toUpperCase();
+        document.getElementById('presensi-kode-jalsah').innerText = `JALSAH: ${jalsah}`;
+
+        const days = this.getDynamicDates();
+        document.getElementById('presensi-bulan-txt').innerText = days[0].bulan;
+
+        let headRow1 = `<th rowspan="2" style="width:30px;">NO</th><th rowspan="2" style="width:80px;">ID PPS</th><th rowspan="2" style="min-width:160px; text-align:left; padding-left:6px;">NAMA SANTRI</th><th rowspan="2" style="width:50px;">DOM</th><th rowspan="2" style="width:50px;">KODE</th>`;
+        let headRow2 = '';
+
+        days.forEach((d) => {
+          if (d.isTSilang) {
+            headRow1 += `<th rowspan="2" class="v-text cell-gray-bg" style="width:30px;">T. Silang<br>(${d.tgl} ${d.hari})</th>`;
+          } else {
+            headRow1 += `<th colspan="4" style="text-align:center;">${d.tgl} ${d.hari}</th>`;
+            headRow2 += `<th class="cell-gray-bg" style="width:28px;">T</th><th class="cell-gray-bg" style="width:28px;">H</th><th style="width:28px;">M</th><th style="width:28px;">P</th>`;
+          }
+        });
+
+        headRow1 += `<th rowspan="2" style="min-width:140px;">KETERANGAN</th>`;
+
+        let list = TTQ.state.santri;
+        if (jalsah !== 'ALL') {
+          list = list.filter(s => String(s.jalsah).trim() === String(jalsah).trim());
+        }
+        if (searchKeyword) {
+          list = list.filter(s => s.nama.toLowerCase().includes(searchKeyword) || s.idPps.includes(searchKeyword) || s.dom.toLowerCase().includes(searchKeyword));
+        }
+
+        let bodyHtml = list.map((s, rIdx) => {
+          const rec = this.attendanceStore[s.idPps] || {};
+          let rowCells = `
+            <td style="text-align:center;">${rIdx + 1}</td>
+            <td style="text-align:center; font-family:monospace;">${s.idPps}</td>
+            <td style="text-align:left; padding-left:6px; font-weight:bold;">${s.nama}</td>
+            <td style="text-align:center;">${s.dom}</td>
+            <td style="text-align:center;">${s.jalsah}</td>
+          `;
+
+          let cIdx = 0;
+          days.forEach((d, dIdx) => {
+            if (d.isTSilang) {
+              const val = rec[`d${dIdx}_ts`] || '';
+              const colorClass = this.getColorClass(val);
+              rowCells += `<td class="cell-gray-bg">
+                <input type="text" class="grid-input cell-gray-bg ${colorClass}" data-row="${rIdx}" data-col="${cIdx}" value="${val}"
+                  oninput="ModulePresensi.updateCell('${s.idPps}', 'd${dIdx}_ts', this)"
+                  onkeydown="ModulePresensi.handleKeyNav(event, ${rIdx}, ${cIdx})" onfocus="this.select()">
+              </td>`;
+              cIdx++;
+            } else {
+              ['t', 'h', 'm', 'p'].forEach(sub => {
+                const val = rec[`d${dIdx}_${sub}`] || '';
+                const colorClass = this.getColorClass(val);
+                const bgGray = (sub === 't' || sub === 'h') ? 'cell-gray-bg' : '';
+                rowCells += `<td class="${bgGray}">
+                  <input type="text" class="grid-input ${bgGray} ${colorClass}" data-row="${rIdx}" data-col="${cIdx}" value="${val}"
+                    oninput="ModulePresensi.updateCell('${s.idPps}', 'd${dIdx}_${sub}', this)"
+                    onkeydown="ModulePresensi.handleKeyNav(event, ${rIdx}, ${cIdx})" onfocus="this.select()">
+                </td>`;
+                cIdx++;
+              });
+            }
+          });
+
+          rowCells += `
+            <td><input type="text" class="grid-input" data-row="${rIdx}" data-col="${cIdx}" value="${rec.ket || ''}"
+              oninput="ModulePresensi.updateCell('${s.idPps}', 'ket', this)"
+              onkeydown="ModulePresensi.handleKeyNav(event, ${rIdx}, ${cIdx})" style="text-align:left; width:100%;" onfocus="this.select()"></td>
+          `;
+
+          return `<tr>${rowCells}</tr>`;
+        }).join('');
+
+        table.innerHTML = `<thead><tr>${headRow1}</tr><tr>${headRow2}</tr></thead><tbody>${bodyHtml}</tbody>`;
+
+        this.calculateAndShowStats(list);
+      },
+
+      calculateAndShowStats(currentList) {
+        const stats = {
+          H: { S: 0, I: 0, A: 0 },
+          T: { S: 0, I: 0, A: 0 },
+          M: { S: 0, I: 0, A: 0 },
+          P: { S: 0, I: 0, A: 0 },
+          TS: { S: 0, I: 0, A: 0 }
+        };
+
+        const days = this.getDynamicDates();
+
+        currentList.forEach(s => {
+          const rec = this.attendanceStore[s.idPps] || {};
+          days.forEach((d, dIdx) => {
+            if (d.isTSilang) {
+              const v = rec[`d${dIdx}_ts`];
+              if (v === 'S') stats.TS.S++;
+              if (v === 'I') stats.TS.I++;
+              if (v === 'A') stats.TS.A++;
+            } else {
+              ['t', 'h', 'm', 'p'].forEach(sub => {
+                const v = rec[`d${dIdx}_${sub}`];
+                const key = sub.toUpperCase();
+                if (v === 'S') stats[key].S++;
+                if (v === 'I') stats[key].I++;
+                if (v === 'A') stats[key].A++;
+              });
+            }
+          });
+        });
+
+        document.getElementById('stat-h-s').innerText = `S: ${stats.H.S}`;
+        document.getElementById('stat-h-i').innerText = `I: ${stats.H.I}`;
+        document.getElementById('stat-h-a').innerText = `A: ${stats.H.A}`;
+
+        document.getElementById('stat-t-s').innerText = `S: ${stats.T.S}`;
+        document.getElementById('stat-t-i').innerText = `I: ${stats.T.I}`;
+        document.getElementById('stat-t-a').innerText = `A: ${stats.T.A}`;
+
+        document.getElementById('stat-m-s').innerText = `S: ${stats.M.S}`;
+        document.getElementById('stat-m-i').innerText = `I: ${stats.M.I}`;
+        document.getElementById('stat-m-a').innerText = `A: ${stats.M.A}`;
+
+        document.getElementById('stat-p-s').innerText = `S: ${stats.P.S}`;
+        document.getElementById('stat-p-i').innerText = `I: ${stats.P.I}`;
+        document.getElementById('stat-p-a').innerText = `A: ${stats.P.A}`;
+
+        document.getElementById('stat-ts-s').innerText = `S: ${stats.TS.S}`;
+        document.getElementById('stat-ts-i').innerText = `I: ${stats.TS.I}`;
+        document.getElementById('stat-ts-a').innerText = `A: ${stats.TS.A}`;
+      },
+
+      getColorClass(val) {
+        if (val === 'S') return 'input-sakit';
+        if (val === 'I') return 'input-izin';
+        if (val === 'A') return 'input-alpa';
+        return '';
+      },
+
+      handleKeyNav(e, rIdx, cIdx) {
+        let targetR = rIdx;
+        let targetC = cIdx;
+
+        if (e.key === 'ArrowUp') {
+          targetR--;
+        } else if (e.key === 'ArrowDown' || e.key === 'Enter') {
+          e.preventDefault();
+          targetR++;
+        } else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) {
+          targetC--;
+        } else if (e.key === 'ArrowRight' && e.target.selectionEnd === e.target.value.length) {
+          targetC++;
+        } else {
+          return;
+        }
+
+        const nextInput = document.querySelector(`.grid-input[data-row="${targetR}"][data-col="${targetC}"]`);
+        if (nextInput) {
+          nextInput.focus();
+          nextInput.select();
+        }
+      },
+
+      updateCell(idPps, key, inputElem) {
+        const val = inputElem.value.toUpperCase().trim();
+        inputElem.value = val;
+
+        inputElem.classList.remove('input-sakit', 'input-izin', 'input-alpa');
+        if (val === 'S') inputElem.classList.add('input-sakit');
+        if (val === 'I') inputElem.classList.add('input-izin');
+        if (val === 'A') inputElem.classList.add('input-alpa');
+
+        if (!this.attendanceStore[idPps]) this.attendanceStore[idPps] = {};
+        this.attendanceStore[idPps][key] = val;
+
+        const rec = this.attendanceStore[idPps];
+        const days = this.getDynamicDates();
+
+        const types = ['T', 'H', 'M', 'P', 'T.Silang'];
+        rec.rekap = {
+          T: { sakit: 0, izin: 0, alpa: 0, tglSakit: [], tglIzin: [], tglAlpa: [], ket: rec.ket || '' },
+          H: { sakit: 0, izin: 0, alpa: 0, tglSakit: [], tglIzin: [], tglAlpa: [], ket: rec.ket || '' },
+          M: { sakit: 0, izin: 0, alpa: 0, tglSakit: [], tglIzin: [], tglAlpa: [], ket: rec.ket || '' },
+          P: { sakit: 0, izin: 0, alpa: 0, tglSakit: [], tglIzin: [], tglAlpa: [], ket: rec.ket || '' },
+          'T.Silang': { sakit: 0, izin: 0, alpa: 0, tglSakit: [], tglIzin: [], tglAlpa: [], ket: rec.ket || '' }
+        };
+
+        const overallS = new Set(), overallI = new Set(), overallA = new Set();
+
+        days.forEach((d, idx) => {
+          if (d.isTSilang) {
+            const v = rec[`d${idx}_ts`];
+            if (v === 'S') { overallS.add(d.tgl); rec.rekap['T.Silang'].sakit++; rec.rekap['T.Silang'].tglSakit.push(d.tgl); }
+            if (v === 'I') { overallI.add(d.tgl); rec.rekap['T.Silang'].izin++; rec.rekap['T.Silang'].tglIzin.push(d.tgl); }
+            if (v === 'A') { overallA.add(d.tgl); rec.rekap['T.Silang'].alpa++; rec.rekap['T.Silang'].tglAlpa.push(d.tgl); }
+          } else {
+            ['t', 'h', 'm', 'p'].forEach(sub => {
+              const subKey = sub.toLowerCase();
+              const typeKey = sub.toUpperCase();
+              const v = rec[`d${idx}_${subKey}`];
+              if (v === 'S') { overallS.add(d.tgl); rec.rekap[typeKey].sakit++; rec.rekap[typeKey].tglSakit.push(d.tgl); }
+              if (v === 'I') { overallI.add(d.tgl); rec.rekap[typeKey].izin++; rec.rekap[typeKey].tglIzin.push(d.tgl); }
+              if (v === 'A') { overallA.add(d.tgl); rec.rekap[typeKey].alpa++; rec.rekap[typeKey].tglAlpa.push(d.tgl); }
+            });
+          }
+        });
+
+        types.forEach(type => {
+          rec.rekap[type].tglSakit = rec.rekap[type].tglSakit.join(', ') || '-';
+          rec.rekap[type].tglIzin = rec.rekap[type].tglIzin.join(', ') || '-';
+          rec.rekap[type].tglAlpa = rec.rekap[type].tglAlpa.join(', ') || '-';
+          rec.rekap[type].ket = rec.ket || '-';
+        });
+
+        rec.totS = overallS.size; rec.totI = overallI.size; rec.totA = overallA.size;
+
+        const santriObj = TTQ.state.santri.find(s => s.idPps === idPps);
+
+        const itemPayload = {
+          idPps: idPps,
+          nama: santriObj ? santriObj.nama : '',
+          jalsah: santriObj ? santriObj.jalsah : activeJalsah,
+          bulan: days[0].bulan,
+          keterangan: rec.ket || '-',
+          rekap: rec.rekap,
+          hasRecord: (rec.totS > 0 || rec.totI > 0 || rec.totA > 0 || (rec.ket && rec.ket !== '-'))
+        };
+
+        if (itemPayload.hasRecord) {
+          LocalDB.savePending(idPps, itemPayload, rec);
+        }
+
+        let currentList = TTQ.state.santri;
+        if (activeJalsah !== 'ALL') currentList = currentList.filter(s => String(s.jalsah).trim() === String(activeJalsah).trim());
+        this.calculateAndShowStats(currentList);
+      },
+
+      printCurrentJalsah() {
+        if (activeJalsah === 'ALL') {
+          this.buildAndPrint(TTQ.state.jalsahList);
+        } else {
+          this.buildAndPrint([activeJalsah]);
+        }
+      },
+
+      printAllJalsah() {
+        if (TTQ.state.jalsahList.length === 0) return showIosAlert('Daftar Jalsah belum dimuat!', 'Peringatan System', 'warning');
+        this.buildAndPrint(TTQ.state.jalsahList);
+      },
+
+      buildAndPrint(targetJalsahList) {
+        const printArea = document.getElementById('print-area');
+        const days = this.getDynamicDates();
+        const thnText = document.getElementById('presensi-tahun-ajaran')?.value || '1447-1448 H';
+
+        let fullPrintHtml = '';
+
+        targetJalsahList.forEach(jalsah => {
+          const namaPembina = TTQ.state.pembinaMap[jalsah] || TTQ.state.pembinaMap[`T${jalsah}`] || `UST. PEMBINA JALSAH ${jalsah}`;
+          let santriList = TTQ.state.santri.filter(s => String(s.jalsah).trim() === String(jalsah).trim());
+
+          const chunkSize = 20;
+          let chunks = [];
+          if (santriList.length === 0) {
+            chunks.push([]);
+          } else {
+            for (let i = 0; i < santriList.length; i += chunkSize) {
+              chunks.push(santriList.slice(i, i + chunkSize));
+            }
+          }
+
+          chunks.forEach((chunk, chunkIdx) => {
+            let headRow1 = `<th rowspan="2" style="width:20px;">NO</th><th rowspan="2" style="width:52px;">ID PPS</th><th rowspan="2" style="width:230px; text-align:left; padding-left:4px;">NAMA</th><th rowspan="2" style="width:28px;">DOM</th><th rowspan="2" style="width:28px;">KLS</th><th rowspan="2" style="width:65px;">TINGKAT</th><th rowspan="2" style="width:32px;">Tahun<br>Masuk</th><th rowspan="2" style="width:35px;">Target<br>Hatam</th>`;
+            let headRow2 = '';
+
+            days.forEach((d) => {
+              if (d.isTSilang) {
+                headRow1 += `<th rowspan="2" class="bg-gray th-tsilang" style="width:16px;">T. Silang</th>`;
+              } else {
+                headRow1 += `<th colspan="4" style="text-align:center;">${d.tgl} &nbsp; ${d.hari}</th>`;
+                headRow2 += `<th class="bg-gray" style="width:12px;">T</th><th class="bg-gray" style="width:12px;">H</th><th style="width:12px;">M</th><th style="width:12px;">P</th>`;
+              }
+            });
+
+            headRow1 += `<th colspan="3" style="width:36px;">Total</th><th rowspan="2" style="width:80px;">KETERANGAN</th>`;
+            headRow2 += `<th style="width:12px;">S</th><th style="width:12px;">I</th><th style="width:12px;">A</th>`;
+
+            let bodyRowsHtml = '';
+            for (let i = 0; i < chunkSize; i++) {
+              const s = chunk[i];
+              const realNo = (chunkIdx * chunkSize) + i + 1;
+
+              if (s) {
+                const rec = this.attendanceStore[s.idPps] || {};
+                let rowCells = `
+                  <td style="text-align:center;">${realNo}</td>
+                  <td style="text-align:center; font-family:monospace;">${s.idPps}</td>
+                  <td class="col-nama">${s.nama}</td>
+                  <td style="text-align:center;">${s.dom}</td>
+                  <td style="text-align:center;">${s.kelas}</td>
+                  <td style="text-align:center;">${s.tingkat}</td>
+                  <td style="text-align:center;">${s.tahunMasuk}</td>
+                  <td style="text-align:center;">${s.targetHatam}</td>
+                `;
+
+                days.forEach((d, idx) => {
+                  if (d.isTSilang) {
+                    rowCells += `<td class="bg-gray" style="text-align:center;">${rec[`d${idx}_ts`] || ''}</td>`;
+                  } else {
+                    rowCells += `
+                      <td class="bg-gray" style="text-align:center;">${rec[`d${idx}_t`] || ''}</td>
+                      <td class="bg-gray" style="text-align:center;">${rec[`d${idx}_h`] || ''}</td>
+                      <td style="text-align:center;">${rec[`d${idx}_m`] || ''}</td>
+                      <td style="text-align:center;">${rec[`d${idx}_p`] || ''}</td>
+                    `;
+                  }
+                });
+
+                rowCells += `
+                  <td style="text-align:center; font-weight:bold;">${rec.totS || ''}</td>
+                  <td style="text-align:center; font-weight:bold;">${rec.totI || ''}</td>
+                  <td style="text-align:center; font-weight:bold;">${rec.totA || ''}</td>
+                  <td style="text-align:left; padding-left:2px;">${rec.ket || ''}</td>
+                `;
+                bodyRowsHtml += `<tr>${rowCells}</tr>`;
+              } else {
+                let emptyCells = `<td style="text-align:center;">${realNo}</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>`;
+                days.forEach((d) => {
+                  if (d.isTSilang) {
+                    emptyCells += `<td class="bg-gray"></td>`;
+                  } else {
+                    emptyCells += `<td class="bg-gray"></td><td class="bg-gray"></td><td></td><td></td>`;
+                  }
+                });
+                emptyCells += `<td></td><td></td><td></td><td></td>`;
+                bodyRowsHtml += `<tr>${emptyCells}</tr>`;
+              }
+            }
+
+            const pageLabel = chunks.length > 1 ? ` (Hal ${chunkIdx + 1}/${chunks.length})` : '';
+
+            fullPrintHtml += `
+              <div class="print-sheet">
+                <div class="p-header">
+                  <h2>PRESENSI TAKROR YAUMIYAH TAHFIDZ AL-QURAN</h2>
+                  <h3>PONDOK PESANTREN SIDOGIRI</h3>
+                  <h4>TAHUN AJARAN ${thnText}</h4>
+                </div>
+
+                <div class="p-meta">
+                  <span>BULAN &nbsp; ${days[0].bulan}</span>
+                  <span>JALSAH: ${jalsah}${pageLabel} &nbsp;&nbsp;|&nbsp;&nbsp; ${namaPembina.toUpperCase()}</span>
+                </div>
+
+                <table class="p-table">
+                  <thead><tr>${headRow1}</tr><tr>${headRow2}</tr></thead>
+                  <tbody>${bodyRowsHtml}</tbody>
+                </table>
+
+                <div class="p-footer">
+                  <div class="p-footer-left">
+                    <strong>KET :</strong> &nbsp;
+                    <strong>H</strong> : Hafalan Baru &nbsp;
+                    <strong>T</strong> : Takror<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <strong>M</strong> : Hadiran Malam &nbsp;
+                    <strong>P</strong> : Hadiran Pagi
+                  </div>
+                  <div class="p-footer-right">
+                    <ol>
+                      <li>Yang <strong>Alpa</strong> lebih 2 kali, Badal Pembina bisa mentakzir sendiri atau melaporkan kepada Pengurus.</li>
+                      <li>Setoran <strong>Hafalan baru</strong> wajib tartil.</li>
+                      <li>Anggota Tahfidz <strong>wajib memakai baju dan songkok putih</strong>.</li>
+                      <li>Ketua Jalsah harap <strong>mencari Anggota Tahfidz</strong> yang tidak hadir.</li>
+                      <li>Nama <strong>yang tidak tercantum</strong> harap diisi dengan ID PPS dan NAMA dengan jelas.</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+        });
+
+        printArea.innerHTML = fullPrintHtml;
+        window.print();
+      }
+    };
+
+    /* ==========================================================
+       5. BACKGROUND SYNC WORKER
+       ========================================================== */
+    window.ModuleSync = {
+      isSyncing: false,
+
+      startAutoSyncWorker() {
+        setInterval(() => {
+          if (navigator.onLine && !this.isSyncing) {
+            this.syncPendingData();
+          }
+        }, 5000);
+      },
+
+      forceSync() {
+        if (!navigator.onLine) {
+          showIosAlert('Anda sedang offline. Pastikan tersambung ke internet.', 'Koneksi Offline', 'warning');
+          return;
+        }
+        this.syncPendingData(true);
+      },
+
+      async syncPendingData(showAlert = false) {
+        const pendingList = Array.from(LocalDB.pendingMap.values());
+        if (pendingList.length === 0) {
+          if (showAlert) showIosAlert('Semua data presensi sudah tersinkronisasi ke Spreadsheet.', 'Sinkronisasi Selesai', 'info');
+          return;
+        }
+
+        this.isSyncing = true;
+        const keysToRemove = pendingList.map(i => i.key);
+        const payloadItems = pendingList.map(i => i.data);
+
+        const payload = {
+          action: 'SAVE_PRESENSI_REKAP',
+          items: payloadItems
+        };
+
+        fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(async (res) => {
+          this.isSyncing = false;
+          if (res.success) {
+            await LocalDB.removeKeys(keysToRemove);
+            if (showAlert) showIosAlert('Berhasil memperbarui data presensi ke Spreadsheet!', 'Berhasil Disimpan', 'success');
+          } else {
+            if (showAlert) showIosAlert('Gagal sinkronisasi: ' + res.error, 'Gagal Sinkronisasi', 'error');
+          }
+        })
+        .catch(err => {
+          this.isSyncing = false;
+          console.error('Sync Error:', err);
+          if (showAlert) showIosAlert('Kesalahan koneksi saat sinkronisasi data.', 'Koneksi Terputus', 'error');
+        });
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      TTQ.init();
+    });
+  </script>
+</body>
+</html>

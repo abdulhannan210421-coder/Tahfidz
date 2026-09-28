@@ -1,0 +1,38 @@
+[
+  {
+    "id": "database",
+    "title": "Database Tahfidz",
+    "file": "Database Tahfidz.html",
+    "icon": "fa-book-quran",
+    "color": "from-emerald-500 to-teal-600",
+    "badge": "Master Data",
+    "description": "Pencarian ID PPS, manajemen data santri, target hatam, dan sinkronisasi otomatis."
+  },
+  {
+    "id": "tes",
+    "title": "Tes Berkala & Keuangan",
+    "file": "Tes Berkala.html",
+    "icon": "fa-clipboard-check",
+    "color": "from-blue-500 to-indigo-600",
+    "badge": "Ujian & Kas",
+    "description": "Pendaftaran tes berkala, penetapan keputusan lulus/tidak lulus, serta buku kas keuangan."
+  },
+  {
+    "id": "presensi",
+    "title": "Presensi Takror",
+    "file": "Presensi.html",
+    "icon": "fa-calendar-check",
+    "color": "from-amber-500 to-orange-600",
+    "badge": "Absensi",
+    "description": "Presensi yaumiyah, rekap ketidakhadiran harian, dan cetak laporan presensi A4 Landscape."
+  },
+  {
+    "id": "perolehan",
+    "title": "Perolehan Lembar",
+    "file": "Perolehan.html",
+    "icon": "fa-chart-column",
+    "color": "from-rose-500 to-pink-600",
+    "badge": "Laporan Bulanan",
+    "description": "Monitoring capaian hafalan bulanan, perolehan lembar, serta statistik daerah T."
+  }
+]

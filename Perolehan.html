@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Laporan Bulanan Perolehan Anggota Tahfidz - Sidogiri</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* HIDE SCROLLBAR TOTALLY ACROSS ALL BROWSERS */
+    .no-scrollbar::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+    .no-scrollbar { -ms-overflow-style: none !important; scrollbar-width: none !important; }
+
+    /* Input Cell Grid Web App */
+    .grid-cell-input {
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      font-weight: 700;
+      font-size: 11px;
+      padding: 6px 2px;
+      border: 1px solid transparent;
+      outline: none;
+      background: transparent;
+    }
+    .grid-cell-input:focus {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+      border-color: #059669 !important;
+      box-shadow: inset 0 0 0 2px #059669;
+    }
+
+    /* Sticky Column Kiri Web UI */
+    .sticky-col-1 { position: sticky; left: 0; z-index: 10; background: #ffffff; }
+    .sticky-col-2 { position: sticky; left: 35px; z-index: 10; background: #ffffff; }
+    .sticky-col-3 { position: sticky; left: 115px; z-index: 10; background: #ffffff; }
+    th.sticky-col-1, th.sticky-col-2, th.sticky-col-3 { background: #047857 !important; color: white; }
+
+    /* MACOS DOCK SPLIT WRAPPERS AUTO HIDE TRANSITION */
+    .dock-wrapper {
+      transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease;
+      will-change: transform, opacity;
+      perspective: 1000px;
+    }
+
+    /* MACOS DOCK TILE 3D HIGH-DIMENSION MAGNIFICATION */
+    .dock-tile {
+      transform-style: preserve-3d;
+      will-change: transform, box-shadow;
+      transition: transform 0.1s cubic-bezier(0.2, 0, 0.13, 1.2), box-shadow 0.1s ease;
+    }
+
+    /* GLOSSY GLASS EFFECT ON TILES */
+    .glass-tile {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.03) 100%);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+    }
+
+    /* ==========================================================================
+       CSS PRINTOUT PRESISI TOTAL - FIT 100% A4 LANDSCAPE TANPA BOLD TEBAL
+       ========================================================================== */
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 4mm 5mm 4mm 5mm;
+      }
+      *, *::before, *::after {
+        box-sizing: border-box !important;
+      }
+      html, body {
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        font-family: Arial, Helvetica, sans-serif !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      header, main, #print-modal, .dock-wrapper, .no-print {
+        display: none !important;
+      }
+      #print-area {
+        display: block !important;
+        width: 100% !important;
+      }
+      .print-page {
+        page-break-after: always;
+        break-after: page;
+        page-break-inside: avoid;
+        break-inside: avoid;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 98vh;
+        max-height: 98vh;
+        box-sizing: border-box;
+        padding: 0;
+        overflow: hidden;
+      }
+      .print-page:last-child {
+        page-break-after: auto;
+        break-after: auto;
+      }
+
+      /* BORDER BINGKAI HITAM EXCEL */
+      .excel-frame {
+        border: 1.5px solid #000000;
+        padding: 6px 8px 5px 8px;
+        box-sizing: border-box;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+    }
+
+    /* CSS TABEL PRINTOUT - REGULAR FONT */
+    .print-table {
+      width: 100% !important;
+      max-width: 100% !important;
+      table-layout: fixed !important;
+      border-collapse: collapse;
+      font-size: 8pt;
+      font-family: Arial, sans-serif;
+    }
+    .print-table th {
+      border: 1px solid #000000;
+      padding: 3px 1px;
+      text-align: center;
+      font-size: 6pt;
+      line-height: 1.1;
+      font-weight: bold;
+      word-wrap: break-word;
+      overflow: hidden;
+    }
+    .print-table td {
+      border: 1px solid #000000;
+      padding: 2.5px 2px;
+      text-align: center;
+      font-size: 8pt;
+      line-height: 1.15;
+      font-weight: normal !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* WARNA CYAN KHAS EXCEL HEADER & NO/ID PPS */
+    .print-bg-cyan {
+      background-color: #00e5d9 !important;
+      color: #000000 !important;
+      font-weight: bold !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen no-scrollbar pb-12">
+
+  <!-- MACOS FLOATING DOCK KIRI (AUTO HIDE & 3D MAGNIFICATION) -->
+  <div id="macos-dock-left-wrapper" class="dock-wrapper fixed left-2 top-1/2 -translate-y-1/2 z-50 no-print -translate-x-[120%] opacity-0 pointer-events-none">
+    <div id="macos-dock-left" 
+      class="bg-slate-900/80 backdrop-blur-2xl border border-white/20 rounded-3xl p-2.5 shadow-2xl shadow-black/80 flex flex-col gap-2.5 items-center overflow-visible">
+      <div class="animate-pulse w-10 h-10 bg-slate-800 rounded-2xl"></div>
+    </div>
+  </div>
+
+  <!-- MACOS FLOATING DOCK KANAN (AUTO HIDE & 3D MAGNIFICATION) -->
+  <div id="macos-dock-right-wrapper" class="dock-wrapper fixed right-2 top-1/2 -translate-y-1/2 z-50 no-print translate-x-[120%] opacity-0 pointer-events-none">
+    <div id="macos-dock-right" 
+      class="bg-slate-900/80 backdrop-blur-2xl border border-white/20 rounded-3xl p-2.5 shadow-2xl shadow-black/80 flex flex-col gap-2.5 items-center overflow-visible">
+      <div class="animate-pulse w-10 h-10 bg-slate-800 rounded-2xl"></div>
+    </div>
+  </div>
+
+  <!-- TOP HEADER DASHBOARD -->
+  <header class="bg-slate-900 text-white shadow-md sticky top-0 z-30 no-print">
+    <div class="max-w-[100rem] mx-auto px-4 py-2.5 flex flex-col md:flex-row justify-between items-center gap-3">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-lg text-emerald-300">
+          <i class="fa-solid fa-quran"></i>
+        </div>
+        <div>
+          <h1 class="text-base font-bold tracking-tight uppercase">LAPORAN BULANAN PEROLEHAN ANGGOTA TAHFIDZ</h1>
+          <p class="text-[11px] text-emerald-200/80 font-light">Pondok Pesantren Sidogiri • Standalone High-Speed Dashboard</p>
+        </div>
+      </div>
+
+      <!-- WIDGET TANGGAL HIJRIYAH REALTIME & ADJUST -->
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="bg-slate-800/90 border border-slate-700/80 rounded-xl px-3 py-1 flex items-center gap-2 text-xs">
+          <i class="fa-solid fa-calendar-days text-emerald-400"></i>
+          <span id="hijri-date-text" class="font-bold text-emerald-200">Sabtu, 14 Rabi'ul Awal 1448 H</span>
+          <div class="flex items-center ml-1 border-l border-slate-700 pl-2 gap-1">
+            <button onclick="adjustHijriDate(-1)" title="Mundurkan 1 Hari" class="w-5 h-5 bg-slate-700 hover:bg-slate-600 active:scale-95 text-white rounded font-bold text-[10px] flex items-center justify-center">-</button>
+            <button onclick="adjustHijriDate(1)" title="Majukan 1 Hari" class="w-5 h-5 bg-slate-700 hover:bg-slate-600 active:scale-95 text-white rounded font-bold text-[10px] flex items-center justify-center">+</button>
+          </div>
+        </div>
+
+        <div id="sync-badge" class="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
+          <i class="fa-solid fa-circle-check text-emerald-400"></i> <span id="sync-text">Tersimpan</span>
+        </div>
+        
+        <button onclick="openPrintModal()" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 rounded-lg text-xs font-bold text-white shadow flex items-center gap-1.5 active:scale-95 transition">
+          <i class="fa-solid fa-print"></i> Cetak Laporan
+        </button>
+
+        <button onclick="forceSyncWithServer()" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-xs font-semibold shadow flex items-center gap-1.5 active:scale-95 transition" title="Sync ke Sheet">
+          <i class="fa-solid fa-arrows-rotate" id="refresh-icon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN DASHBOARD CONTENT -->
+  <main class="max-w-[100rem] mx-auto px-4 md:px-6 mt-4 space-y-4 no-print">
+
+    <!-- STATS OVERVIEW CARDS -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div class="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+        <div>
+          <p class="text-[10px] font-bold text-slate-400 uppercase">Total Anggota</p>
+          <h3 class="text-xl font-extrabold text-slate-800" id="stat-total">0</h3>
+        </div>
+        <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"><i class="fa-solid fa-users text-sm"></i></div>
+      </div>
+      <div class="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+        <div>
+          <p class="text-[10px] font-bold text-slate-400 uppercase">Khatam (HATAM)</p>
+          <h3 class="text-xl font-extrabold text-amber-600" id="stat-hatam">0</h3>
+        </div>
+        <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"><i class="fa-solid fa-crown text-sm"></i></div>
+      </div>
+      <div class="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+        <div>
+          <p class="text-[10px] font-bold text-slate-400 uppercase">Juz 20 / 21+</p>
+          <h3 class="text-xl font-extrabold text-emerald-600" id="stat-juz21">0</h3>
+        </div>
+        <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><i class="fa-solid fa-book-bookmark text-sm"></i></div>
+      </div>
+      <div class="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+        <div>
+          <p class="text-[10px] font-bold text-slate-400 uppercase">MSLH (&lt; 8 Lbr)</p>
+          <h3 class="text-xl font-extrabold text-rose-600" id="stat-mslh">0</h3>
+        </div>
+        <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center"><i class="fa-solid fa-triangle-exclamation text-sm"></i></div>
+      </div>
+    </div>
+
+    <!-- SEARCH BAR & INFORMASI JALSAH AKTIF -->
+    <div class="bg-white p-3 rounded-xl border border-slate-200 flex flex-col md:flex-row justify-between gap-3 items-center">
+      <div class="flex items-center gap-3 w-full md:w-auto">
+        <div class="relative w-full md:w-80">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <input type="text" id="search-input" oninput="filterData()" placeholder="Cari Nama / ID PPS / Domisili..." 
+            class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+        <div id="current-jalsah-badge" class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs font-bold text-emerald-800 whitespace-nowrap">
+          <i class="fa-solid fa-layer-group text-emerald-600"></i>
+          <span id="active-jalsah-text">SEMUA JALSAH</span>
+        </div>
+      </div>
+      <div class="text-[11px] text-slate-500 font-medium flex items-center gap-2">
+        <i class="fa-solid fa-hand-pointer text-emerald-600"></i> Dekatkan kursor ke <b>tepi kiri</b> atau <b>tepi kanan layar</b> untuk memilih Jalsah!
+      </div>
+    </div>
+
+    <!-- TABEL UTAMA SPREADSHEET WEB APP -->
+    <div class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden">
+      <div class="overflow-x-auto no-scrollbar max-h-[72vh]">
+        <table class="w-full text-left border-collapse text-[11px]">
+          <thead class="sticky top-0 z-20">
+            <!-- HEADER BARIS 1 -->
+            <tr class="bg-emerald-700 text-white uppercase font-bold text-[10px] tracking-wider">
+              <th class="p-2 border border-emerald-600 text-center w-8 sticky-col-1">NO</th>
+              <th class="p-2 border border-emerald-600 w-20 sticky-col-2">ID PPS</th>
+              <th class="p-2 border border-emerald-600 min-w-[170px] sticky-col-3">NAMA SANTRI</th>
+              <th class="p-2 border border-emerald-600 text-center w-12">DOM</th>
+              <th class="p-2 border border-emerald-600 text-center w-16">KELAS</th>
+              <th class="p-2 border border-emerald-600 text-center w-24">TINGKAT</th>
+              <th class="p-2 border border-emerald-600 text-center w-12">KODE</th>
+              <th class="p-2 border border-emerald-600 text-center w-16">TAHUN MASUK</th>
+              <th class="p-2 border border-emerald-600 text-center w-16">TARGET</th>
+              <th colspan="9" class="p-2 border border-emerald-600 text-center bg-teal-800">PEROLEHAN LEMBAR HAFALAN (1 TAHUN)</th>
+              <th class="p-2 border border-emerald-600 text-center w-24 bg-emerald-800">TOTAL (JUZ)</th>
+              <th class="p-2 border border-emerald-600 text-center w-20 bg-emerald-800">HAL AKHIR</th>
+              <th class="p-2 border border-emerald-600 text-center w-20 bg-emerald-800">JUZ AKHIR</th>
+              <th class="p-2 border border-emerald-600 text-center min-w-[130px] bg-emerald-800">KETERANGAN</th>
+            </tr>
+            <!-- HEADER BARIS 2 (BULAN) -->
+            <tr class="bg-emerald-800 text-white text-[9px] uppercase font-bold">
+              <th colspan="9" class="p-1 border border-emerald-700 bg-emerald-900"></th>
+              <th class="p-1 border border-emerald-700 text-center w-14">D.QA'DAH</th>
+              <th class="p-1 border border-emerald-700 text-center w-14">D.HIJJAH</th>
+              <th class="p-1 border border-emerald-700 text-center w-14">MUHARRAM</th>
+              <th class="p-1 border border-emerald-700 text-center w-14">SHAFAR</th>
+              <th class="p-1 border border-emerald-700 text-center w-14">R.AWAL</th>
+              <th class="p-1 border border-emerald-700 text-center w-14">R.TSANI</th>
+              <th class="p-1 border border-emerald-700 text-center w-14">J.AWAL</th>
+              <th class="p-1 border border-emerald-700 text-center w-14">J.ISANI</th>
+              <th class="p-1 border border-emerald-700 text-center w-16">RAJAB/SYA</th>
+              <th colspan="4" class="p-1 border border-emerald-700 bg-emerald-900"></th>
+            </tr>
+          </thead>
+          <tbody id="table-body" class="divide-y divide-slate-200 font-medium text-slate-700">
+            <tr>
+              <td colspan="22" class="text-center py-12 text-slate-400">
+                <i class="fa-solid fa-spinner fa-spin text-2xl text-emerald-600 mb-2"></i>
+                <p>Memuat database...</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- LEGEND FOOTER -->
+    <div class="bg-white p-3 rounded-xl border border-slate-200 text-xs flex flex-wrap gap-4 items-center">
+      <span class="font-bold text-slate-700">Keterangan Warna:</span>
+      <div class="flex items-center gap-1.5"><span class="w-3 h-3 bg-rose-500 rounded"></span> <span><b>MSLH:</b> Perolehan 0 - 7.5 lembar (&lt; 8)</span></div>
+      <div class="flex items-center gap-1.5"><span class="w-3 h-3 bg-amber-300 rounded"></span> <span><b>HATAM:</b> 700 Halaman / Khatam 30 Juz</span></div>
+      <div class="flex items-center gap-1.5"><span class="w-3 h-3 bg-emerald-300 rounded"></span> <span><b>JUZ 20/21+:</b> Capaian Hafalan Tinggi (Juz 20+)</span></div>
+    </div>
+
+  </main>
+
+  <!-- WADAH PRINTOUT -->
+  <div id="print-area" class="hidden"></div>
+
+  <!-- MODAL OPSI PRINT -->
+  <div id="print-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-200">
+      <div class="bg-gradient-to-r from-emerald-800 to-teal-800 p-4 text-white flex justify-between items-center">
+        <h3 class="font-bold text-sm flex items-center gap-2">
+          <i class="fa-solid fa-print"></i> Opsi Cetak Laporan Tahfidz
+        </h3>
+        <button onclick="closePrintModal()" class="text-white/80 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+
+      <div class="p-5 space-y-3.5 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Cakupan Data yang Dicetak:</label>
+          <select id="print-mode" onchange="onPrintModeChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500">
+            <option value="CURRENT">Cetak Jalsah Aktif Saat Ini (<span id="print-modal-jalsah-name">T20</span>)</option>
+            <option value="ALL">Cetak Semua Jalsah (Per Halaman Terpisah)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Periode Tahun Ajaran (Header Laporan):</label>
+          <input type="text" id="print-periode" value="PERIODE 1447-1448 H" placeholder="Contoh: PERIODE 1447-1448 H" 
+            onchange="savePeriodeSetting(this.value)"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500" />
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Pilih Bulan Utama Header Laporan:</label>
+          <select id="print-month-select" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500">
+            <option value="D. QA'DAH">D. QA'DAH</option>
+            <option value="D. HIJJAH">D. HIJJAH</option>
+            <option value="MUHARRAM">MUHARRAM</option>
+            <option value="SHAFAR">SHAFAR</option>
+            <option value="R. AWAL">R. AWAL</option>
+            <option value="R. TSANI">R. TSANI</option>
+            <option value="J. ULA">J. ULA</option>
+            <option value="J. TSANI">J. TSANI</option>
+            <option value="RAJAB & SYA'BAN">RAJAB & SYA'BAN</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Nama Pembina / Ust. (Sesuai Badal_Pembina):</label>
+          <input type="text" id="print-ust-name" value="UST. MOCH KHOLIL" 
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500 disabled:opacity-50" />
+          <p id="pembina-auto-note" class="text-[10px] text-emerald-600 font-semibold mt-1">✓ Otomatis terdeteksi dari sheet Badal_Pembina</p>
+        </div>
+
+        <div class="bg-amber-50 border border-amber-200 p-2.5 rounded-xl text-amber-900 text-[11px]">
+          <i class="fa-solid fa-circle-info mr-1"></i> Tampilan cetak <b>100% Fit A4 Landscape</b> (MSLH Kunci Per-Bulan, Filter Presisi Daerah T & Luar T).
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button onclick="closePrintModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl font-semibold text-slate-600">Batal</button>
+          <button onclick="executePrint()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow flex items-center gap-2 active:scale-95 transition">
+            <i class="fa-solid fa-print"></i> Mulai Cetak
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbyxUxHHN179eb5XfsyX3YIg3ljfDbXlnoM6xLKgt2ml4CTxntoRUcxg3_vtiBqgcwVy/exec";
+    
+    const MONTH_SEARCH_KEYS = [
+      ['qodah', 'qo\'dah', 'qada'],
+      ['hijjah'],
+      ['muharram', 'muhara'],
+      ['shafar', 'safar'],
+      ['r.awal', 'rawal'],
+      ['r.tsani', 'rtsani'],
+      ['j.awal', 'jawal', 'j.ula'],
+      ['j.isani', 'jisani', 'j.tsani'],
+      ['rajab', 'sya']
+    ];
+
+    let rawHeaders = [];
+    let dbRows = [];
+    let filteredRows = [];
+    let activeJalsah = "ALL";
+    let pendingSyncQueue = [];
+    let isInitialDataLoaded = false;
+    let statsTimeout = null;
+
+    let mappedMonthIndices = [];
+    let mappedTotalIdx = -1;
+    let mappedHalAkhirIdx = -1;
+    let mappedJuzAkhirIdx = -1;
+    let mappedKetIdx = -1;
+
+    let pembinaMap = {};
+    let hijriOffset = parseInt(localStorage.getItem('tahfidz_hijri_offset') || '0');
+
+    // --- HELPER FORMAT ANGKA TOTAL JUZ RAPI ---
+    function formatJuzVal(totLembar) {
+      const num = parseFloat(totLembar) || 0;
+      const juz = num / 10;
+      const rounded = Math.round(juz * 100) / 100;
+      return rounded.toString().replace('.', ',') + " JUZ";
+    }
+
+    // --- INDEXEDDB STORAGE ENGINE ---
+    const DB_NAME = "TahfidzStandaloneDB_v13";
+    let db;
+
+    function initDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, 1);
+        request.onupgradeneeded = (e) => {
+          db = e.target.result;
+          if (!db.objectStoreNames.contains("tahfidz_data")) {
+            db.createObjectStore("tahfidz_data", { keyPath: "id" });
+          }
+        };
+        request.onsuccess = (e) => { db = e.target.result; resolve(db); };
+        request.onerror = (e) => reject(e);
+      });
+    }
+
+    async function saveToLocalDB(headers, rows, pMap) {
+      if (!db) await initDB();
+      const tx = db.transaction(["tahfidz_data"], "readwrite");
+      tx.objectStore("tahfidz_data").put({ id: "main_data", headers: headers, rows: rows, pembinaMap: pMap || {} });
+    }
+
+    async function getFromLocalDB() {
+      if (!db) await initDB();
+      return new Promise((resolve) => {
+        const tx = db.transaction(["tahfidz_data"], "readonly");
+        const req = tx.objectStore("tahfidz_data").get("main_data");
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => resolve(null);
+      });
+    }
+
+    window.onload = async function() {
+      updateHijriDisplay();
+      await initDB();
+      
+      const cached = await getFromLocalDB();
+      if (cached && cached.rows && cached.rows.length > 0) {
+        rawHeaders = cached.headers;
+        dbRows = cached.rows;
+        pembinaMap = cached.pembinaMap || {};
+        isInitialDataLoaded = true;
+        mapHeaderIndices();
+        renderJalsahGrid();
+        filterData();
+        calculateStats();
+        updateSyncStatus("local");
+      }
+
+      loadDataFromServer();
+      setInterval(backgroundSyncWorker, 4000);
+      setupMacDockSplitAutoHideAnd3DPhysics();
+    };
+
+    async function loadDataFromServer() {
+      try {
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+          google.script.run.withSuccessHandler(onServerDataLoaded).getTahfidzData();
+          return;
+        }
+
+        const res = await fetch(`${API_URL}?action=getData`);
+        const data = await res.json();
+        onServerDataLoaded(data);
+      } catch (err) {
+        console.warn("Offline, menggunakan data lokal IndexedDB.");
+      }
+    }
+
+    function onServerDataLoaded(data) {
+      if (!data || !data.rows) return;
+      if (data.pembinaMap) pembinaMap = data.pembinaMap;
+
+      if (!isInitialDataLoaded) {
+        rawHeaders = data.headers;
+        dbRows = data.rows;
+        isInitialDataLoaded = true;
+        mapHeaderIndices();
+        saveToLocalDB(rawHeaders, dbRows, pembinaMap);
+        renderJalsahGrid();
+        filterData();
+        calculateStats();
+        updateSyncStatus("synced");
+      }
+    }
+
+    function getAdjustedHijriObj() {
+      let now = new Date();
+      now.setDate(now.getDate() + hijriOffset);
+
+      try {
+        const formatter = new Intl.DateTimeFormat('id-ID-u-ca-islamic-umalqura', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          weekday: 'long'
+        });
+        const parts = formatter.formatToParts(now);
+        let dayName = "", dayNum = "", monthName = "", yearNum = "";
+        parts.forEach(p => {
+          if (p.type === 'weekday') dayName = p.value;
+          if (p.type === 'day') dayNum = p.value;
+          if (p.type === 'month') monthName = p.value;
+          if (p.type === 'year') yearNum = p.value;
+        });
+        return { dayName, dayNum, monthName, yearNum };
+      } catch(e) {
+        return { dayName: "Sabtu", dayNum: "14", monthName: "Rabi'ul Awal", yearNum: "1448" };
+      }
+    }
+
+    function updateHijriDisplay() {
+      const h = getAdjustedHijriObj();
+      document.getElementById('hijri-date-text').innerText = `${h.dayName}, ${h.dayNum} ${h.monthName} ${h.yearNum} H`;
+    }
+
+    function adjustHijriDate(delta) {
+      hijriOffset += delta;
+      localStorage.setItem('tahfidz_hijri_offset', hijriOffset);
+      updateHijriDisplay();
+    }
+
+    function getMappedHijriMonthNameForSelect() {
+      const h = getAdjustedHijriObj();
+      const m = h.monthName.toLowerCase();
+
+      if (m.includes('qa') || m.includes('qada')) return "D. QA'DAH";
+      if (m.includes('hij') || m.includes('hijj')) return "D. HIJJAH";
+      if (m.includes('muhar')) return "MUHARRAM";
+      if (m.includes('safar') || m.includes('shafar')) return "SHAFAR";
+      if (m.includes('rabi') && (m.includes('awal') || m.includes('1') || m.includes('i'))) return "R. AWAL";
+      if (m.includes('rabi') && (m.includes('tsani') || m.includes('2') || m.includes('ii'))) return "R. TSANI";
+      if (m.includes('jumad') && (m.includes('ula') || m.includes('awal') || m.includes('1'))) return "J. ULA";
+      if (m.includes('jumad') && (m.includes('tsani') || m.includes('2'))) return "J. TSANI";
+      if (m.includes('rajab') || m.includes('sya')) return "RAJAB & SYA'BAN";
+      
+      return "R. TSANI";
+    }
+
+    function savePeriodeSetting(val) {
+      localStorage.setItem('tahfidz_periode', val);
+    }
+
+    function findColIndexFlexible(keywords) {
+      if (!rawHeaders || rawHeaders.length === 0) return -1;
+      for (let key of keywords) {
+        const cleanKey = key.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+        for (let i = 0; i < rawHeaders.length; i++) {
+          const cleanHeader = String(rawHeaders[i] || '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+          if (cleanHeader.includes(cleanKey)) return i;
+        }
+      }
+      return -1;
+    }
+
+    function mapHeaderIndices() {
+      mappedMonthIndices = MONTH_SEARCH_KEYS.map(keys => findColIndexFlexible(keys));
+      for (let i = 0; i < 9; i++) {
+        if (mappedMonthIndices[i] === -1) mappedMonthIndices[i] = 7 + i;
+      }
+      mappedHalAkhirIdx = findColIndexFlexible(['halakhir', 'hal']);
+      if (mappedHalAkhirIdx === -1) mappedHalAkhirIdx = 17;
+
+      mappedJuzAkhirIdx = findColIndexFlexible(['juzakhir', 'juz']);
+      if (mappedJuzAkhirIdx === -1) mappedJuzAkhirIdx = 18;
+
+      mappedTotalIdx = findColIndexFlexible(['perolehansatutahun', 'total']);
+      if (mappedTotalIdx === -1) mappedTotalIdx = 19;
+
+      mappedKetIdx = findColIndexFlexible(['keterangan', 'ket']);
+      if (mappedKetIdx === -1) mappedKetIdx = 21;
+    }
+
+    // --- RENDER SPLIT DOCK (LEFT & RIGHT) WITH PERFECT FLOATING TOOLTIPS ---
+    function renderJalsahGrid() {
+      const jalsahIdx = rawHeaders.indexOf("JALSAH") !== -1 ? rawHeaders.indexOf("JALSAH") : 5;
+      let jalsahSet = new Set();
+      
+      dbRows.forEach(row => { 
+        const val = row[jalsahIdx];
+        if (val !== undefined && val !== null && String(val).trim() !== "") {
+          jalsahSet.add(String(val).trim()); 
+        }
+      });
+
+      let sortedJalsah = Array.from(jalsahSet).sort((a, b) => {
+        return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+      });
+
+      const allItems = ['ALL', ...sortedJalsah];
+      const half = Math.ceil(allItems.length / 2);
+      const leftList = allItems.slice(0, half);
+      const rightList = allItems.slice(half);
+
+      const dockLeft = document.getElementById('macos-dock-left');
+      const dockRight = document.getElementById('macos-dock-right');
+
+      // 1. RENDER DOCK KIRI (TOOLTIP MELAYANG KE KANAN)
+      let htmlLeft = '';
+      leftList.forEach(j => {
+        const isAll = j === 'ALL';
+        const count = isAll ? dbRows.length : dbRows.filter(r => String(r[jalsahIdx]).trim() === j).length;
+        const isActive = activeJalsah === j;
+        const labelName = isAll ? 'ALL' : ((j === '0' || j === 0) ? '0' : j);
+        const fullLabel = isAll ? 'Semua Jalsah' : ((j === '0' || j === 0) ? 'JALSAH 0' : `JALSAH ${j}`);
+
+        htmlLeft += `
+          <div class="dock-tile relative group flex items-center justify-center cursor-pointer" data-jalsah="${j}">
+            <button onclick="selectJalsah('${j}')" 
+              class="w-10 h-10 rounded-2xl flex flex-col items-center justify-center font-black text-[10.5px] leading-none transition-all duration-200 border glass-tile relative
+              ${isActive ? 'bg-gradient-to-tr from-emerald-600 to-teal-500 text-white border-emerald-300 ring-2 ring-emerald-400/60 shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-slate-800/80 text-slate-300 border-white/10 hover:bg-slate-700/90 hover:text-white'}">
+              ${isAll ? '<i class="fa-solid fa-list-check text-[11px] mb-0.5"></i>' : ''}
+              <span>${labelName}</span>
+              ${isActive ? '<span class="absolute -right-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>' : ''}
+            </button>
+            <div class="absolute left-14 top-1/2 -translate-y-1/2 bg-slate-900/95 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl shadow-2xl border border-white/20 opacity-0 group-hover:opacity-100 transition-all duration-150 pointer-events-none whitespace-nowrap z-[9999]">
+              ${fullLabel} <span class="text-emerald-400 ml-1">(${count} Santri)</span>
+            </div>
+          </div>
+        `;
+      });
+
+      // 2. RENDER DOCK KANAN (TOOLTIP MELAYANG KE KIRI)
+      let htmlRight = '';
+      rightList.forEach(j => {
+        const count = dbRows.filter(r => String(r[jalsahIdx]).trim() === j).length;
+        const isActive = activeJalsah === j;
+        const labelName = (j === '0' || j === 0) ? '0' : j;
+        const fullLabel = (j === '0' || j === 0) ? 'JALSAH 0' : `JALSAH ${j}`;
+
+        htmlRight += `
+          <div class="dock-tile relative group flex items-center justify-center cursor-pointer" data-jalsah="${j}">
+            <button onclick="selectJalsah('${j}')" 
+              class="w-10 h-10 rounded-2xl flex flex-col items-center justify-center font-black text-[10.5px] leading-none transition-all duration-200 border glass-tile relative
+              ${isActive ? 'bg-gradient-to-tr from-emerald-600 to-teal-500 text-white border-emerald-300 ring-2 ring-emerald-400/60 shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-slate-800/80 text-slate-300 border-white/10 hover:bg-slate-700/90 hover:text-white'}">
+              <span>${labelName}</span>
+              ${isActive ? '<span class="absolute -left-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>' : ''}
+            </button>
+            <div class="absolute right-14 top-1/2 -translate-y-1/2 bg-slate-900/95 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl shadow-2xl border border-white/20 opacity-0 group-hover:opacity-100 transition-all duration-150 pointer-events-none whitespace-nowrap z-[9999]">
+              ${fullLabel} <span class="text-emerald-400 ml-1">(${count} Santri)</span>
+            </div>
+          </div>
+        `;
+      });
+
+      dockLeft.innerHTML = htmlLeft;
+      dockRight.innerHTML = htmlRight;
+
+      setupMacDockSplitAutoHideAnd3DPhysics();
+    }
+
+    // --- AUTO-HIDE ENGINE + 3D ELEVATION MAGNIFICATION ---
+    let isLeftOpen = false;
+    let isRightOpen = false;
+    let rAFPending = false;
+
+    function setupMacDockSplitAutoHideAnd3DPhysics() {
+      const leftWrapper = document.getElementById('macos-dock-left-wrapper');
+      const rightWrapper = document.getElementById('macos-dock-right-wrapper');
+      const dockLeft = document.getElementById('macos-dock-left');
+      const dockRight = document.getElementById('macos-dock-right');
+
+      if (!leftWrapper || !rightWrapper) return;
+
+      function updateDocks(x, y) {
+        const screenWidth = window.innerWidth;
+
+        // --- DOCK KIRI TRIGGER & AUTO HIDE ---
+        if (x <= 25 && !isLeftOpen) {
+          isLeftOpen = true;
+          leftWrapper.classList.remove('-translate-x-[120%]', 'opacity-0', 'pointer-events-none');
+          leftWrapper.classList.add('translate-x-0', 'opacity-100', 'pointer-events-auto');
+        } else if (isLeftOpen) {
+          const rect = leftWrapper.getBoundingClientRect();
+          if (x > rect.right + 45 || y < rect.top - 40 || y > rect.bottom + 40) {
+            isLeftOpen = false;
+            leftWrapper.classList.add('-translate-x-[120%]', 'opacity-0', 'pointer-events-none');
+            leftWrapper.classList.remove('translate-x-0', 'opacity-100', 'pointer-events-auto');
+          }
+        }
+
+        // --- DOCK KANAN TRIGGER & AUTO HIDE ---
+        if (x >= screenWidth - 25 && !isRightOpen) {
+          isRightOpen = true;
+          rightWrapper.classList.remove('translate-x-[120%]', 'opacity-0', 'pointer-events-none');
+          rightWrapper.classList.add('translate-x-0', 'opacity-100', 'pointer-events-auto');
+        } else if (isRightOpen) {
+          const rect = rightWrapper.getBoundingClientRect();
+          if (x < rect.left - 45 || y < rect.top - 40 || y > rect.bottom + 40) {
+            isRightOpen = false;
+            rightWrapper.classList.add('translate-x-[120%]', 'opacity-0', 'pointer-events-none');
+            rightWrapper.classList.remove('translate-x-0', 'opacity-100', 'pointer-events-auto');
+          }
+        }
+
+        // --- 3D MAGNIFICATION PHYSICS UNTUK DOCK KIRI ---
+        if (isLeftOpen) apply3DMagnification(dockLeft, y, 'left');
+
+        // --- 3D MAGNIFICATION PHYSICS UNTUK DOCK KANAN ---
+        if (isRightOpen) apply3DMagnification(dockRight, y, 'right');
+      }
+
+      function apply3DMagnification(dockEl, mouseY, side) {
+        const tiles = dockEl.querySelectorAll('.dock-tile');
+        const maxDistance = 90;
+        const maxScale = 0.42;
+
+        tiles.forEach(tile => {
+          const rect = tile.getBoundingClientRect();
+          const centerY = rect.top + rect.height / 2;
+          const distance = Math.abs(mouseY - centerY);
+
+          if (distance < maxDistance) {
+            const factor = Math.cos((distance / maxDistance) * (Math.PI / 2));
+            const scale = 1 + (maxScale * Math.pow(factor, 2));
+            const shiftX = side === 'left' ? (scale - 1) * 16 : (1 - scale) * 16;
+            
+            // Transformasi 3D berdimensi tinggi
+            tile.style.transform = `scale(${scale}) translateX(${shiftX}px) translateZ(20px)`;
+            tile.style.zIndex = Math.round(scale * 40);
+          } else {
+            tile.style.transform = 'scale(1) translateX(0px) translateZ(0px)';
+            tile.style.zIndex = '1';
+          }
+        });
+      }
+
+      window.addEventListener('mousemove', (e) => {
+        if (!rAFPending) {
+          requestAnimationFrame(() => {
+            updateDocks(e.clientX, e.clientY);
+            rAFPending = false;
+          });
+          rAFPending = true;
+        }
+      });
+    }
+
+    function selectJalsah(jalsah) {
+      activeJalsah = jalsah;
+      renderJalsahGrid();
+      filterData();
+
+      const activeBadgeText = document.getElementById('active-jalsah-text');
+      if (activeBadgeText) {
+        activeBadgeText.innerText = jalsah === 'ALL' ? 'SEMUA JALSAH' : (jalsah === '0' ? 'JALSAH 0' : `JALSAH ${jalsah}`);
+      }
+    }
+
+    function filterData() {
+      const searchVal = document.getElementById('search-input').value.toLowerCase();
+      const nameIdx = rawHeaders.indexOf("NAMA") !== -1 ? rawHeaders.indexOf("NAMA") : 1;
+      const idIdx = rawHeaders.indexOf("ID PPS") !== -1 ? rawHeaders.indexOf("ID PPS") : 0;
+      const domIdx = rawHeaders.indexOf("DOMISILI") !== -1 ? rawHeaders.indexOf("DOMISILI") : 2;
+      const jalsahIdx = rawHeaders.indexOf("JALSAH") !== -1 ? rawHeaders.indexOf("JALSAH") : 5;
+
+      filteredRows = dbRows.filter((row, originalIndex) => {
+        row._origIndex = originalIndex;
+        const matchesJalsah = (activeJalsah === 'ALL') || (String(row[jalsahIdx]).trim() === activeJalsah);
+        const matchesSearch = !searchVal || 
+          String(row[nameIdx]).toLowerCase().includes(searchVal) ||
+          String(row[idIdx]).toLowerCase().includes(searchVal) ||
+          String(row[domIdx]).toLowerCase().includes(searchVal);
+        
+        return matchesJalsah && matchesSearch;
+      });
+
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('table-body');
+      
+      const idIdx = 0;
+      const nameIdx = 1;
+      const domIdx = 2;
+      const kelasIdx = 3;
+      const tingkatIdx = 4;
+      const jalsahIdx = 5;
+      const thnMasukIdx = 6;
+      const targetIdx = mappedHalAkhirIdx - 1 > 6 ? mappedHalAkhirIdx - 1 : 16;
+
+      if (filteredRows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="22" class="text-center py-8 text-slate-400">Tidak ada data santri ditemukan.</td></tr>`;
+        return;
+      }
+
+      let html = '';
+      filteredRows.forEach((row, fIdx) => {
+        const origIdx = row._origIndex;
+
+        html += `<tr class="hover:bg-slate-50 border-b border-slate-200">
+          <td class="p-1.5 text-center text-slate-400 sticky-col-1">${fIdx + 1}</td>
+          <td class="p-1.5 font-mono text-slate-600 sticky-col-2">${row[idIdx] || '-'}</td>
+          <td class="p-1.5 font-bold text-slate-800 sticky-col-3">${row[nameIdx] || '-'}</td>
+          <td class="p-1.5 text-center">${row[domIdx] || '-'}</td>
+          <td class="p-1.5 text-center">${row[kelasIdx] || '-'}</td>
+          <td class="p-1.5 text-center text-[10px]">${row[tingkatIdx] || '-'}</td>
+          <td class="p-1.5 text-center font-bold">${row[jalsahIdx] !== undefined ? row[jalsahIdx] : '-'}</td>
+          <td class="p-1.5 text-center">${row[thnMasukIdx] || '-'}</td>
+          <td class="p-1.5 text-center text-[10px]">${row[targetIdx] || '-'}</td>`;
+
+        mappedMonthIndices.forEach((mColIdx, cIdx) => {
+          const val = row[mColIdx] !== undefined ? row[mColIdx] : '';
+          const numVal = parseFloat(val);
+          
+          let cellBg = '';
+          if (val !== "" && !isNaN(numVal) && numVal >= 0 && numVal <= 7.5) {
+            cellBg = 'bg-rose-500 text-white font-extrabold';
+          }
+
+          html += `<td class="p-0 border-l border-slate-200 text-center">
+            <input type="text" inputmode="decimal" value="${val}"
+              data-r="${fIdx}" data-c="${cIdx}"
+              data-orig="${origIdx}" data-colidx="${mColIdx}"
+              onfocus="this.select()"
+              oninput="previewCellColor(this)"
+              onchange="commitCellEdit(this, 'month', ${fIdx})"
+              onkeydown="handleKeyNav(event, ${fIdx}, ${cIdx})"
+              class="grid-cell-input ${cellBg}" />
+          </td>`;
+        });
+
+        const totalJuzVal = formatJuzVal(row[mappedTotalIdx]);
+        const halVal = row[mappedHalAkhirIdx] !== undefined ? row[mappedHalAkhirIdx] : 0;
+        const juzVal = String(row[mappedJuzAkhirIdx] || '-').toUpperCase();
+        const ketVal = row[mappedKetIdx] !== undefined ? row[mappedKetIdx] : '';
+
+        let juzBg = getJuzColorClass(juzVal, halVal);
+
+        html += `
+          <td class="p-1.5 text-center font-bold text-slate-800 bg-slate-50" id="total-juz-${fIdx}">${totalJuzVal}</td>
+          
+          <td class="p-0 border-l border-slate-200 text-center">
+            <input type="text" inputmode="decimal" value="${halVal}"
+              data-r="${fIdx}" data-c="9"
+              data-orig="${origIdx}" data-colidx="${mappedHalAkhirIdx}"
+              onfocus="this.select()"
+              onchange="commitCellEdit(this, 'hal', ${fIdx})"
+              onkeydown="handleKeyNav(event, ${fIdx}, 9)"
+              class="grid-cell-input font-bold text-slate-800" />
+          </td>
+
+          <td class="p-0 border-l border-slate-200 text-center">
+            <input type="text" value="${juzVal}"
+              data-r="${fIdx}" data-c="10"
+              data-orig="${origIdx}" data-colidx="${mappedJuzAkhirIdx}"
+              onfocus="this.select()"
+              onchange="commitCellEdit(this, 'juz', ${fIdx})"
+              onkeydown="handleKeyNav(event, ${fIdx}, 10)"
+              class="grid-cell-input ${juzBg}" />
+          </td>
+
+          <td class="p-0 border-l border-slate-200 text-center min-w-[130px]">
+            <input type="text" value="${ketVal}"
+              data-r="${fIdx}" data-c="11"
+              data-orig="${origIdx}" data-colidx="${mappedKetIdx}"
+              onfocus="this.select()"
+              onchange="commitCellEdit(this, 'ket', ${fIdx})"
+              onkeydown="handleKeyNav(event, ${fIdx}, 11)"
+              class="grid-cell-input text-left px-2 font-medium" placeholder="Tulis ket..." />
+          </td>
+        </tr>`;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    function previewCellColor(el) {
+      const val = el.value.trim();
+      const numVal = parseFloat(val);
+      if (val !== "" && !isNaN(numVal) && numVal >= 0 && numVal <= 7.5) {
+        el.className = "grid-cell-input bg-rose-500 text-white font-extrabold";
+      } else {
+        el.className = "grid-cell-input";
+      }
+    }
+
+    function commitCellEdit(el, type, fIdx) {
+      const origIdx = parseInt(el.dataset.orig);
+      const val = el.value.trim();
+
+      if (type === 'month') {
+        const mColIdx = parseInt(el.dataset.colidx);
+        const numVal = parseFloat(val);
+        const validNum = !isNaN(numVal) ? numVal : 0;
+        const oldVal = parseFloat(dbRows[origIdx][mColIdx]) || 0;
+        const delta = (val === "" ? 0 : validNum) - oldVal;
+
+        dbRows[origIdx][mColIdx] = val === "" ? "" : validNum;
+
+        let totalLembar = 0;
+        mappedMonthIndices.forEach(idx => {
+          if (idx !== -1) {
+            const v = parseFloat(dbRows[origIdx][idx]);
+            if (!isNaN(v)) totalLembar += v;
+          }
+        });
+        dbRows[origIdx][mappedTotalIdx] = totalLembar;
+
+        let curHal = parseFloat(dbRows[origIdx][mappedHalAkhirIdx]) || 0;
+        let newHal = Math.min(700, Math.max(0, curHal + (delta * 2)));
+        dbRows[origIdx][mappedHalAkhirIdx] = newHal;
+
+        let newJuz = calculateJuzFromHal(newHal);
+        dbRows[origIdx][mappedJuzAkhirIdx] = newJuz;
+
+        const totalJuzCell = document.getElementById(`total-juz-${fIdx}`);
+        if (totalJuzCell) totalJuzCell.innerText = formatJuzVal(totalLembar);
+
+        const halEl = document.querySelector(`input[data-r="${fIdx}"][data-c="9"]`);
+        if (halEl) halEl.value = newHal;
+
+        const juzEl = document.querySelector(`input[data-r="${fIdx}"][data-c="10"]`);
+        if (juzEl) {
+          juzEl.value = newJuz;
+          juzEl.className = "grid-cell-input " + getJuzColorClass(newJuz, newHal);
+        }
+
+        previewCellColor(el);
+
+        enqueueSync({ rowIdx: origIdx, colIdx: mColIdx, val: val === "" ? "" : validNum });
+        enqueueSync({ rowIdx: origIdx, colIdx: mappedTotalIdx, val: totalLembar });
+        enqueueSync({ rowIdx: origIdx, colIdx: mappedHalAkhirIdx, val: newHal });
+        enqueueSync({ rowIdx: origIdx, colIdx: mappedJuzAkhirIdx, val: newJuz });
+
+      } else if (type === 'hal') {
+        const numHal = parseFloat(val) || 0;
+
+        dbRows[origIdx][mappedHalAkhirIdx] = numHal;
+        let newJuz = calculateJuzFromHal(numHal);
+        dbRows[origIdx][mappedJuzAkhirIdx] = newJuz;
+
+        const juzEl = document.querySelector(`input[data-r="${fIdx}"][data-c="10"]`);
+        if (juzEl) {
+          juzEl.value = newJuz;
+          juzEl.className = "grid-cell-input " + getJuzColorClass(newJuz, numHal);
+        }
+
+        enqueueSync({ rowIdx: origIdx, colIdx: mappedHalAkhirIdx, val: numHal });
+        enqueueSync({ rowIdx: origIdx, colIdx: mappedJuzAkhirIdx, val: newJuz });
+
+      } else if (type === 'juz') {
+        const strJuz = val.toUpperCase();
+        dbRows[origIdx][mappedJuzAkhirIdx] = strJuz;
+
+        el.className = "grid-cell-input " + getJuzColorClass(strJuz, dbRows[origIdx][mappedHalAkhirIdx]);
+        enqueueSync({ rowIdx: origIdx, colIdx: mappedJuzAkhirIdx, val: strJuz });
+
+      } else if (type === 'ket') {
+        const ketIdx = mappedKetIdx;
+        dbRows[origIdx][ketIdx] = val;
+        enqueueSync({ rowIdx: origIdx, colIdx: ketIdx, val: val });
+      }
+
+      saveToLocalDB(rawHeaders, dbRows, pembinaMap);
+      debouncedStats();
+    }
+
+    function handleKeyNav(e, r, c) {
+      let nextR = r;
+      let nextC = c;
+      let shouldNavigate = false;
+
+      if (e.key === 'Enter' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        nextR = r + 1;
+        shouldNavigate = true;
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        nextR = r - 1;
+        shouldNavigate = true;
+      } else if (e.key === 'Tab') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          nextC = c - 1;
+          if (nextC < 0) { nextC = 11; nextR = r - 1; }
+        } else {
+          nextC = c + 1;
+          if (nextC > 11) { nextC = 0; nextR = r + 1; }
+        }
+        shouldNavigate = true;
+      } else if (e.key === 'ArrowRight' && (e.target.selectionEnd === e.target.value.length || e.target.value === "")) {
+        nextC = c + 1;
+        if (nextC > 11) { nextC = 0; nextR = r + 1; }
+        shouldNavigate = true;
+      } else if (e.key === 'ArrowLeft' && (e.target.selectionStart === 0 || e.target.value === "")) {
+        nextC = c - 1;
+        if (nextC < 0) { nextC = 11; nextR = r - 1; }
+        shouldNavigate = true;
+      }
+
+      if (shouldNavigate) {
+        e.target.blur();
+
+        if (nextR >= 0 && nextR < filteredRows.length && nextC >= 0 && nextC <= 11) {
+          const targetEl = document.querySelector(`input[data-r="${nextR}"][data-c="${nextC}"]`);
+          if (targetEl) {
+            targetEl.focus();
+            targetEl.select();
+          }
+        }
+      }
+    }
+
+    function enqueueSync(item) {
+      pendingSyncQueue.push(item);
+      updateSyncStatus("pending");
+    }
+
+    async function backgroundSyncWorker() {
+      if (pendingSyncQueue.length === 0) return;
+
+      const batchToSync = [...pendingSyncQueue];
+      pendingSyncQueue = [];
+
+      updateSyncStatus("syncing");
+
+      try {
+        const payload = { updates: batchToSync };
+
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+          google.script.run
+            .withSuccessHandler(() => updateSyncStatus("synced"))
+            .withFailureHandler(() => {
+              pendingSyncQueue.push(...batchToSync);
+              updateSyncStatus("pending");
+            })
+            .doPost({ postData: { contents: JSON.stringify(payload) } });
+          return;
+        }
+
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const result = await res.json();
+
+        if (result.success) {
+          updateSyncStatus("synced");
+        } else {
+          pendingSyncQueue.push(...batchToSync);
+          updateSyncStatus("pending");
+        }
+      } catch (err) {
+        pendingSyncQueue.push(...batchToSync);
+        updateSyncStatus("pending");
+      }
+    }
+
+    function forceSyncWithServer() {
+      const refreshIcon = document.getElementById('refresh-icon');
+      if (refreshIcon) refreshIcon.classList.add('fa-spin');
+      backgroundSyncWorker().then(() => {
+        loadDataFromServer().then(() => {
+          if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+          Swal.fire({ icon: 'success', title: 'Data Tersinkronisasi Live!', timer: 1500, showConfirmButton: false });
+        });
+      });
+    }
+
+    function updateSyncStatus(type) {
+      const badge = document.getElementById('sync-badge');
+      const text = document.getElementById('sync-text');
+
+      if (type === 'synced') {
+        badge.className = "px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-2 bg-emerald-500/20 text-emerald-200 border border-emerald-400/30";
+        text.innerText = "Tersimpan";
+      } else if (type === 'pending' || type === 'local') {
+        badge.className = "px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-2 bg-amber-500/20 text-amber-200 border border-amber-400/30";
+        text.innerText = `Lokal (${pendingSyncQueue.length} Pending)`;
+      } else if (type === 'syncing') {
+        badge.className = "px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-2 bg-blue-500/20 text-blue-200 border border-blue-400/30";
+        text.innerText = "Menyinkronkan...";
+      }
+    }
+
+    function debouncedStats() {
+      clearTimeout(statsTimeout);
+      statsTimeout = setTimeout(calculateStats, 300);
+    }
+
+    function calculateJuzFromHal(hal) {
+      if (hal >= 700) return "HATAM";
+      var juzNum = Math.min(30, Math.ceil(hal / 23.33));
+      return juzNum >= 30 ? "HATAM" : "JUZ " + (juzNum || 1);
+    }
+
+    function getJuzColorClass(juzStr, halVal) {
+      if (String(juzStr).includes("HATAM") || parseFloat(halVal) >= 700) {
+        return 'bg-amber-300 text-amber-950 font-bold';
+      }
+      const match = String(juzStr).match(/\d+/);
+      if (match && parseInt(match[0]) >= 20) {
+        return 'bg-emerald-300 text-emerald-950 font-bold';
+      }
+      return '';
+    }
+
+    function calculateStats() {
+      const juzIdx = mappedJuzAkhirIdx;
+      const halIdx = mappedHalAkhirIdx;
+
+      let hatamCount = 0;
+      let juz21Count = 0;
+      let mslhCount = 0;
+
+      dbRows.forEach(row => {
+        const juzStr = String(row[juzIdx] || '').toUpperCase();
+        const halVal = parseFloat(row[halIdx]) || 0;
+        
+        if (juzStr.includes("HATAM") || halVal >= 700) {
+          hatamCount++;
+        } else {
+          const match = juzStr.match(/\d+/);
+          if (match && parseInt(match[0]) >= 20) juz21Count++;
+        }
+
+        mappedMonthIndices.forEach(mIdx => {
+          if (mIdx !== -1) {
+            const mVal = parseFloat(row[mIdx]);
+            if (!isNaN(mVal) && mVal >= 0 && mVal <= 7.5) mslhCount++;
+          }
+        });
+      });
+
+      document.getElementById('stat-total').innerText = dbRows.length;
+      document.getElementById('stat-hatam').innerText = hatamCount;
+      document.getElementById('stat-juz21').innerText = juz21Count;
+      document.getElementById('stat-mslh').innerText = mslhCount;
+    }
+
+    // =========================================================================
+    // MODUL PRINTOUT LAPORAN AKURAT - PERHITUNGAN DAERAH T & STATISTIK PRESISI
+    // =========================================================================
+
+    function normalizeKey(str) {
+      return String(str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    }
+
+    function getPembinaNameForJalsah(jCode) {
+      if (!pembinaMap || Object.keys(pembinaMap).length === 0) return "UST. MOCH KHOLIL";
+      
+      const rawKey = String(jCode || '').trim();
+      const normTarget = normalizeKey(rawKey);
+      
+      if (pembinaMap[rawKey]) return pembinaMap[rawKey];
+      
+      for (let k in pembinaMap) {
+        if (normalizeKey(k) === normTarget) {
+          return pembinaMap[k];
+        }
+      }
+      
+      if (normTarget === '0' || normTarget === 'jalsah0') {
+        for (let k in pembinaMap) {
+          let nk = normalizeKey(k);
+          if (nk === '0' || nk === 'jalsah0') return pembinaMap[k];
+        }
+      }
+      
+      return "UST. MOCH KHOLIL";
+    }
+
+    function openPrintModal() {
+      const activeName = activeJalsah === 'ALL' ? 'SEMUA JALSAH' : (activeJalsah === '0' ? 'JALSAH 0' : `JALSAH ${activeJalsah}`);
+      document.getElementById('print-modal-jalsah-name').innerText = activeName;
+
+      const savedPeriode = localStorage.getItem('tahfidz_periode') || "PERIODE 1447-1448 H";
+      document.getElementById('print-periode').value = savedPeriode;
+
+      const monthSelect = document.getElementById('print-month-select');
+      const currentHijriMonthMapped = getMappedHijriMonthNameForSelect();
+      if (monthSelect) monthSelect.value = currentHijriMonthMapped;
+
+      onPrintModeChange();
+      document.getElementById('print-modal').classList.remove('hidden');
+    }
+
+    function onPrintModeChange() {
+      const mode = document.getElementById('print-mode').value;
+      const ustInput = document.getElementById('print-ust-name');
+      const note = document.getElementById('pembina-auto-note');
+
+      if (mode === 'ALL') {
+        ustInput.disabled = true;
+        ustInput.value = "Otomatis Masing-Masing Jalsah (Badal_Pembina)";
+        note.innerText = "✓ Setiap Jalsah akan dicetak dengan Pembina masing-masing dari sheet Badal_Pembina";
+      } else {
+        ustInput.disabled = false;
+        const targetJalsahKey = activeJalsah === 'ALL' ? 'T20' : activeJalsah;
+        ustInput.value = getPembinaNameForJalsah(targetJalsahKey);
+        note.innerText = "✓ Otomatis terdeteksi dari sheet Badal_Pembina (Bisa diubah manual)";
+      }
+    }
+
+    function closePrintModal() {
+      document.getElementById('print-modal').classList.add('hidden');
+    }
+
+    function formatPrintNum(val) {
+      if (val === "" || val === undefined || val === null || val === "-") return "-";
+      const num = parseFloat(val);
+      if (isNaN(num)) return val;
+      return String(num).replace('.', ',');
+    }
+
+    function executePrint() {
+      const mode = document.getElementById('print-mode').value;
+      const monthName = document.getElementById('print-month-select').value;
+      const customUstName = document.getElementById('print-ust-name').value;
+      const periodeText = document.getElementById('print-periode').value.trim() || "PERIODE 1447-1448 H";
+
+      savePeriodeSetting(periodeText);
+
+      // KUNCI INDEKS BULAN TERPILIH UNTUK HITUNG MSLH FOOTER PRINTOUT
+      let selectedMonthIdx = 0;
+      if (monthName.includes("QA'DAH")) selectedMonthIdx = 0;
+      else if (monthName.includes("HIJJAH")) selectedMonthIdx = 1;
+      else if (monthName.includes("MUHARRAM")) selectedMonthIdx = 2;
+      else if (monthName.includes("SHAFAR")) selectedMonthIdx = 3;
+      else if (monthName.includes("R. AWAL")) selectedMonthIdx = 4;
+      else if (monthName.includes("R. TSANI")) selectedMonthIdx = 5;
+      else if (monthName.includes("J. ULA")) selectedMonthIdx = 6;
+      else if (monthName.includes("J. TSANI")) selectedMonthIdx = 7;
+      else if (monthName.includes("RAJAB")) selectedMonthIdx = 8;
+
+      const targetMonthColIdx = mappedMonthIndices[selectedMonthIdx];
+
+      const jalsahIdx = rawHeaders.indexOf("JALSAH") !== -1 ? rawHeaders.indexOf("JALSAH") : 5;
+
+      let jalsahListToPrint = [];
+
+      if (mode === 'CURRENT') {
+        if (activeJalsah === 'ALL') {
+          let setJ = new Set();
+          dbRows.forEach(r => { if (r[jalsahIdx] !== undefined) setJ.add(String(r[jalsahIdx]).trim()); });
+          jalsahListToPrint = Array.from(setJ).sort((a,b) => a.localeCompare(b, undefined, {numeric: true}));
+        } else {
+          jalsahListToPrint = [activeJalsah];
+        }
+      } else {
+        let setJ = new Set();
+        dbRows.forEach(r => { if (r[jalsahIdx] !== undefined) setJ.add(String(r[jalsahIdx]).trim()); });
+        jalsahListToPrint = Array.from(setJ).sort((a,b) => a.localeCompare(b, undefined, {numeric: true}));
+      }
+
+      let printHTML = '';
+
+      jalsahListToPrint.forEach((jCode, pIndex) => {
+        const santriList = dbRows.filter(r => String(r[jalsahIdx]).trim() === jCode);
+        const jDisplayCode = (jCode === '0' || jCode === 0) ? 'JALSAH 0' : `JALSAH ${jCode}`;
+
+        const ustNameForThisJalsah = (mode === 'ALL' || jalsahListToPrint.length > 1) ? getPembinaNameForJalsah(jCode) : customUstName;
+
+        // CONTAINER KERTAS A4 LANDSCAPE
+        printHTML += `<div class="print-page bg-white text-black font-sans">`;
+
+        // BORDER BINGKAI LUAR EXCEL
+        printHTML += `<div class="excel-frame">`;
+
+        // BAGIAN ATAS (HEADER + TABEL)
+        printHTML += `<div>`;
+
+        // 1. JUDUL HEADER
+        printHTML += `
+          <div style="text-align: center; font-family: Arial, sans-serif; margin-bottom: 3px;">
+            <h1 style="font-size: 11pt; font-weight: 800; margin: 0; padding: 0; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.1;">LAPORAN BULANAN PEROLEHAN ANGGOTA TAHFIDZ</h1>
+            <h2 style="font-size: 8.5pt; font-weight: 700; margin: 1px 0 0 0; padding: 0; text-transform: uppercase; line-height: 1.1;">PONDOK PESANTREN SIDOGIRI</h2>
+            <h3 style="font-size: 7.5pt; font-weight: 600; margin: 1px 0 0 0; padding: 0; text-transform: uppercase; line-height: 1.1;">${periodeText}</h3>
+          </div>
+
+          <!-- META HEADER -->
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; font-family: Arial, sans-serif; font-size: 8pt; font-weight: bold; margin-bottom: 3px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span>BULAN</span>
+              <span style="border-left: 2px solid #000; padding-left: 8px; text-transform: uppercase;">${monthName}</span>
+            </div>
+            <div style="display: flex; gap: 40px; text-transform: uppercase;">
+              <span>${jDisplayCode}</span>
+              <span>${ustNameForThisJalsah}</span>
+            </div>
+          </div>
+        `;
+
+        // 2. TABEL PEROLEHAN
+        printHTML += `
+          <table class="print-table">
+            <colgroup>
+              <col style="width: 2.5%;"> <!-- NO -->
+              <col style="width: 5.5%;"> <!-- ID PPS -->
+              <col style="width: 26.0%;"> <!-- NAMA -->
+              <col style="width: 3.2%;"> <!-- DOM -->
+              <col style="width: 3.0%;"> <!-- KELAS -->
+              <col style="width: 4.5%;"> <!-- TINGKAT -->
+              <col style="width: 3.2%;"> <!-- TAHUN MASUK -->
+              <col style="width: 3.2%;"> <!-- TARGET MASUK -->
+              <col style="width: 3.0%;"> <!-- D. QA'DAH -->
+              <col style="width: 3.0%;"> <!-- D. HIJJAH -->
+              <col style="width: 3.0%;"> <!-- MUHARRAM -->
+              <col style="width: 3.0%;"> <!-- SHAFAR -->
+              <col style="width: 3.0%;"> <!-- R. AWAL -->
+              <col style="width: 3.0%;"> <!-- R. TSANI -->
+              <col style="width: 3.0%;"> <!-- J. ULA -->
+              <col style="width: 3.0%;"> <!-- J. TSANI -->
+              <col style="width: 3.0%;"> <!-- RAJAB SYABAN -->
+              <col style="width: 4.8%;"> <!-- TOTAL PEROLEHAN -->
+              <col style="width: 3.6%;"> <!-- HAL AKHIR -->
+              <col style="width: 4.0%;"> <!-- JUZ AKHIR -->
+              <col style="width: 9.5%;"> <!-- KETERANGAN -->
+            </colgroup>
+            <thead>
+              <tr class="print-bg-cyan">
+                <th rowspan="2">NO</th>
+                <th rowspan="2">ID PPS</th>
+                <th rowspan="2" style="text-align: left; padding-left: 4px; font-size: 7.5pt;">NAMA</th>
+                <th rowspan="2">DOM</th>
+                <th rowspan="2" style="font-size: 5.5pt;">KELAS</th>
+                <th rowspan="2" style="font-size: 5.5pt;">TINGKAT</th>
+                <th rowspan="2" style="font-size: 5.5pt;">TAHUN<br>MASUK</th>
+                <th rowspan="2" style="font-size: 5.5pt;">TARGET<br>MASUK</th>
+                <th colspan="9" style="padding: 1px 0; font-size: 7pt;">PEROLEHAN LEMBAR HAFALAN</th>
+                <th rowspan="2" style="font-size: 5.5pt;">TOTAL<br>1 TAHUN</th>
+                <th rowspan="2" style="font-size: 5.5pt;">HAL AKHIR<br>BULAN INI</th>
+                <th rowspan="2">JUZ AKHIR</th>
+                <th rowspan="2">KETERANGAN</th>
+              </tr>
+              <tr class="print-bg-cyan" style="font-size: 5.5pt;">
+                <th>D. QA'DAH</th>
+                <th>D. HIJJAH</th>
+                <th>MUHARRAM</th>
+                <th>SHAFAR</th>
+                <th>R. AWAL</th>
+                <th>R. TSANI</th>
+                <th>J. ULA</th>
+                <th>J. TSANI</th>
+                <th>RAJAB &amp;<br>SYA'BAN</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        let countDaerahT = 0;
+        let countLuarT = 0;
+        let countSyariah = 0, countAliyah = 0, countTsanawiyah = 0, countIbtidaiyah = 0, countIdadiyah = 0;
+        let countMSLH = 0, countHatam = 0, countJuz21 = 0;
+        let countBadal1 = 0, countBadal2 = 0, countBadal3 = 0;
+
+        const totalRowsToPrint = Math.max(20, santriList.length);
+
+        for (let i = 0; i < totalRowsToPrint; i++) {
+          const row = santriList[i];
+
+          if (row) {
+            // VERIFIKASI DOMISILI DAERAH T VS LUAR T
+            const domVal = String(row[2] || '').trim().toUpperCase();
+            if (domVal.startsWith('T')) {
+              countDaerahT++;
+            } else if (domVal !== '') {
+              countLuarT++;
+            }
+
+            const tingkat = String(row[4] || '').toLowerCase();
+            if (tingkat.includes('syariah')) countSyariah++;
+            else if (tingkat.includes('aliyah')) countAliyah++;
+            else if (tingkat.includes('tsanawiyah')) countTsanawiyah++;
+            else if (tingkat.includes('ibtidaiyah')) countIbtidaiyah++;
+            else if (tingkat.includes('idadiyah')) countIdadiyah++;
+
+            const halVal = parseFloat(row[mappedHalAkhirIdx]) || 0;
+            const juzStr = String(row[mappedJuzAkhirIdx] || '').toUpperCase();
+            const ketText = row[mappedKetIdx] !== undefined ? row[mappedKetIdx] : '';
+
+            if (juzStr.includes('HATAM') || halVal >= 700) {
+              countHatam++;
+              countBadal3++;
+            } else {
+              const m = juzStr.match(/\d+/);
+              if (m) {
+                const jNum = parseInt(m[0]);
+                if (jNum >= 20) countJuz21++;
+                
+                if (jNum >= 1 && jNum <= 10) countBadal1++;
+                else if (jNum >= 11 && jNum <= 20) countBadal2++;
+                else if (jNum >= 21) countBadal3++;
+              }
+            }
+
+            // HITUNG MSLH KHUSUS UNTUK BULAN YANG SEDANG DILAPORKAN/DIPILIH
+            if (targetMonthColIdx !== -1) {
+              const selectedMVal = row[targetMonthColIdx];
+              const numSelM = parseFloat(selectedMVal);
+              if (selectedMVal !== "" && selectedMVal !== undefined && selectedMVal !== null && selectedMVal !== "-" && !isNaN(numSelM) && numSelM >= 0 && numSelM <= 7.5) {
+                countMSLH++;
+              }
+            }
+
+            const totLembar = parseFloat(row[mappedTotalIdx]) || 0;
+            const totalJuzFormatted = formatJuzVal(totLembar);
+
+            // COLORING JUZ AKHIR
+            let juzStyle = "";
+            if (juzStr.includes('HATAM') || halVal >= 700) {
+              juzStyle = "background-color: #fef08a !important; color: #713f12 !important; font-weight: bold;";
+            } else {
+              const m = juzStr.match(/\d+/);
+              if (m && parseInt(m[0]) >= 20) {
+                juzStyle = "background-color: #86efac !important; color: #14532d !important; font-weight: bold;";
+              }
+            }
+
+            printHTML += `
+              <tr>
+                <td class="print-bg-cyan">${i + 1}</td>
+                <td class="print-bg-cyan font-mono">${row[0] || ''}</td>
+                <td style="text-align: left; padding-left: 4px; font-size: 8pt; text-transform: uppercase;">${row[1] || ''}</td>
+                <td style="font-size: 7.5pt;">${row[2] || ''}</td>
+                <td style="font-size: 6pt;">${row[3] || ''}</td>
+                <td style="font-size: 6pt;">${row[4] || ''}</td>
+                <td style="font-size: 6pt;">${row[6] || ''}</td>
+                <td style="font-size: 6pt;">${row[16] || row[mappedHalAkhirIdx - 1] || '3 Tahun'}</td>
+            `;
+
+            mappedMonthIndices.forEach(mIdx => {
+              const val = row[mIdx];
+              const num = parseFloat(val);
+              let cellStyle = "";
+
+              if (val !== "" && val !== undefined && val !== null && val !== "-" && !isNaN(num) && num >= 0 && num <= 7.5) {
+                cellStyle = "background-color: #fecdd3 !important; color: #b91c1c !important; font-weight: bold;";
+              }
+
+              printHTML += `<td style="${cellStyle}">${formatPrintNum(val)}</td>`;
+            });
+
+            printHTML += `
+                <td>${totalJuzFormatted}</td>
+                <td>${halVal || 0}</td>
+                <td style="${juzStyle}">${juzStr}</td>
+                <td style="text-align: left; padding: 1px 2px; font-size: 5.5pt; line-height: 1.05; white-space: normal !important; word-break: break-word;">${ketText}</td>
+              </tr>
+            `;
+
+          } else {
+            printHTML += `
+              <tr>
+                <td class="print-bg-cyan">${i + 1}</td>
+                <td class="print-bg-cyan font-mono"></td>
+                <td></td><td></td><td></td><td></td><td></td><td></td>
+                <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                <td></td>
+                <td></td>
+                <td style="color: #475569; font-weight: bold;">JUZ</td>
+                <td></td>
+              </tr>
+            `;
+          }
+        }
+
+        printHTML += `
+            </tbody>
+          </table>
+        </div> <!-- TUTUP ATAS -->
+        `;
+
+        // 3. FOOTER KET LENGKAP PRESISI AKURAT
+        const labelDaerah = countLuarT > 0 
+          ? `Jumlah Anggota Tahfidz Daerah T: ${countDaerahT} <span style="font-weight:normal; color:#b91c1c;">(Luar T: ${countLuarT})</span>`
+          : `Jumlah Anggota Tahfidz Daerah T: ${countDaerahT}`;
+
+        printHTML += `
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; font-size: 7.5pt; margin-top: 3px; padding-top: 2px; border-top: 1px solid #000; font-family: Arial, sans-serif;">
+            <!-- FOOTER KIRI -->
+            <div style="display: flex; gap: 6px;">
+              <span style="font-weight: bold; color: #0284c7; font-size: 8.5pt;">KET :</span>
+              <div>
+                <p style="font-weight: bold; margin: 0 0 1px 0;">${labelDaerah}</p>
+                <p style="margin: 0;">Kuliah Syariah: ${countSyariah}</p>
+                <p style="margin: 0;">Aliyah: ${countAliyah}</p>
+                <p style="margin: 0;">Tsanawiyah: ${countTsanawiyah}</p>
+                <p style="margin: 0;">Ibtidaiyah: ${countIbtidaiyah}</p>
+                <p style="margin: 0;">Idadiyah: ${countIdadiyah}</p>
+              </div>
+            </div>
+
+            <!-- FOOTER TENGAH: LEGEND WARNA -->
+            <div style="line-height: 1.3;">
+              <p style="margin: 0 0 2px 0;"><span style="background-color: #fecdd3; color: #b91c1c; padding: 0 4px; font-weight: bold;">MSLH</span> Tidak sampai target bulan ini : ${countMSLH} Orang</p>
+              <p style="margin: 0 0 2px 0;"><span style="background-color: #fef08a; color: #713f12; padding: 0 4px; font-weight: bold;">CAWIS</span> Hatam: ${countHatam} Orang</p>
+              <p style="margin: 0;"><span style="background-color: #86efac; color: #14532d; padding: 0 4px; font-weight: bold;">JUZ 20+</span> Perolehan Juz 20+: ${countJuz21} Orang</p>
+            </div>
+
+            <!-- FOOTER KANAN -->
+            <div style="line-height: 1.3;">
+              <p style="font-weight: bold; margin: 0 0 1px 0;">Perolehan Anak Badal</p>
+              <p style="margin: 0;">Juz 1-10: ${countBadal1} Orang</p>
+              <p style="margin: 0;">Juz 11-20: ${countBadal2} Orang</p>
+              <p style="margin: 0;">Juz 21-Hatam: ${countBadal3} Orang</p>
+            </div>
+          </div>
+        `;
+
+        printHTML += `</div>`; // TUTUP BINGKAI EXCEL-FRAME
+        printHTML += `</div>`; // TUTUP PRINT-PAGE
+      });
+
+      const printArea = document.getElementById('print-area');
+      printArea.innerHTML = printHTML;
+
+      closePrintModal();
+
+      setTimeout(() => {
+        window.print();
+      }, 200);
+    }
+  </script>
+</body>
+</html>
